@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
-    font-family: 'Outfit', Courier, monospace;
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
+* {
+  font-family: "Manrope", Courier, monospace;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
-

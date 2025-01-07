@@ -2,6 +2,7 @@ import HeroText from "../../components/HeroText";
 import HeroFooter from "../../components/HeroFooter";
 import HeroImg from "../../components/HeroImg";
 import Need from "../../components/Need";
+import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 
 const Hero = () => {
@@ -18,6 +19,7 @@ const Hero = () => {
         </div>
       </div>
       <Need />
+      <Footer />
     </div>
   );
 };
