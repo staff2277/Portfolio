@@ -1,4 +1,4 @@
-import Lottie from "lottie-react";
+import Lottie from "lottie-react"; // Static import
 import mail from "../animations/mail.json";
 
 const Footer = () => {

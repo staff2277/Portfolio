@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Lottie from "lottie-react";
+import Lottie from "lottie-react"; // Static import
 import dot from "../animations/dot4.json";
 
 const Navbar = () => {

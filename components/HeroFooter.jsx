@@ -1,4 +1,4 @@
-import Lottie from "lottie-react";
+import Lottie from "lottie-react"; // Static import
 import arrow from "../animations/arrow1.json";
 
 const HeroFooter = () => {
