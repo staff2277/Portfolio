@@ -4,7 +4,7 @@ import arrow from "../animations/arrow1.json";
 
 const HeroImg = () => {
   return (
-    <div className="flex border-2 justify-between items-end sm:justify-end relative w-full h-[90%] overflow-hidden">
+    <div className="flex  justify-between items-end sm:justify-end relative w-full h-[90%] overflow-hidden">
       <span className="bg-[#e7dfc6] rounded-3xl mddd:hidden">
         <Lottie
           animationData={arrow}

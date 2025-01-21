@@ -8,7 +8,7 @@ const Hero = () => {
   return (
     <div className="h-screen   pt-5 ">
       <div className="flex px-10 dee-only:px-2 justify-between h-[100%] mddd-only:flex-col">
-        <div className="flex flex-col justify-between seee-only:block border-2 pt-[5rem]">
+        <div className="flex flex-col justify-between seee-only:block pt-[5rem]">
           <HeroText />
           <HeroFooter />
         </div>

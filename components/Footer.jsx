@@ -4,9 +4,9 @@ import mail from "../animations/mail.json";
 const Footer = () => {
   return (
     <div className="px-10 dee-only:px-2 h-screen grid grid-rows-[auto_25%] bg-[#e7dfc6]  ">
-      <div className="border-2 flex items-end h-full border-black md-only:justify-center 3xl:px-[10%] max-2xl:px-[5%]">
+      <div className="flex items-end h-full  md-only:justify-center 3xl:px-[10%] max-2xl:px-[5%]">
         <div className="flex justify-between items-center  2xl:px-[5%]">
-          <div className=" flex border-2 flex-col justify-end md-only:items-center md-only:w-full">
+          <div className=" flex flex-col justify-end md-only:items-center md-only:w-full">
             <div className="flex items-center gap-[20px]">
               <span>
                 <img
@@ -35,7 +35,7 @@ const Footer = () => {
               </div>
             </div>
           </div>
-          <div className="w-[30%] md-only:hidden border-2 flex justify-center items-center ">
+          <div className="w-[30%] md-only:hidden  flex justify-center items-center ">
             <Lottie animationData={mail} className="" loop={true} />
           </div>
         </div>
