@@ -1,9 +1,10 @@
-import React from 'react'
-
+import Footer from "../../components/Footer";
 const Contact = () => {
   return (
-    <div>Contact</div>
-  )
-}
+    <div className="h-[90vh]">
+      <Footer />
+    </div>
+  );
+};
 
-export default Contact
+export default Contact;

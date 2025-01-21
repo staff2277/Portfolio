@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import Lottie from "lottie-react"; // Static import
+import { Link, useLocation } from "react-router-dom";
+import Lottie from "lottie-react";
 import dot from "../animations/dot4.json";
+import clsx from "clsx";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,11 +11,18 @@ const Navbar = () => {
     setIsOpen(!isOpen);
   };
 
+  let location = useLocation();
+
   return (
     <>
-      <nav className="flex px-10 dee-only:px-2 justify-between pt-3 items-center h-[10%]">
+      <nav
+        className={clsx({
+          "flex px-10 dee-only:px-2 z-30 justify-between pt-3 items-center absolute top-0 left-0 right-0 h-[10%]": true,
+          "bg-transparent   text-[#e7dfc6] ": location.pathname == "/about",
+        })}
+      >
         <Link to="/">
-          <div className="border-2">
+          <div className="">
             <p className="font-bold text-[1.15rem] sm-only:text-[.9rem]">
               MUSTAPHA OSMAN
             </p>
@@ -48,11 +56,11 @@ const Navbar = () => {
         </div>
 
         <ul
-          className={`flex gap-14 items-center mdd-only:hidden ${
-            isOpen
-              ? "flex-col absolute top-20 left-0 bg-white w-full p-4"
-              : "flex-row"
-          }`}
+          className={clsx("flex gap-14 items-center", {
+            "mdd-only:hidden": true,
+            "flex-col absolute top-20 left-0 bg-white w-full p-4": isOpen,
+            "flex-row": !isOpen,
+          })}
         >
           <li>
             <Link to="/about">About</Link>
@@ -60,7 +68,16 @@ const Navbar = () => {
           <li>
             <Link to="/contact">Contact</Link>
           </li>
-          <li className="pl-5 pr-9 py-0 dee-only:px-4 dee-only:pl-2 flex items-center bg-[#f0ede4] rounded-full ">
+          <li
+            className={clsx(
+              "pl-5 pr-9 py-0 dee-only:px-4 dee-only:pl-2 flex items-center rounded-full",
+              {
+                "text-black bg-[#e7dfc6]": location.pathname === "/about",
+                "bg-[#f0ede4]": location.pathname === "/",
+                "bg-[#f0ede3]": location.pathname === "/contact",
+              }
+            )}
+          >
             <Lottie
               animationData={dot}
               loop={true}

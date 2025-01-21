@@ -35,7 +35,7 @@ const Footer = () => {
       <div className="flex justify-between items-end mb-[20px]">
         <div>
           <p className="text-[#999999]">Version</p>
-          <p>2022 © Edition</p>
+          <p>2025 © Edition</p>
         </div>
         <div>
           <p>Socials</p>
