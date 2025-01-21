@@ -36,7 +36,7 @@ const HeroText = () => {
   };
 
   return (
-    <div className="mt-[25%] ml-[10%] ee-only:ml-0 dee-only:mt-[25%] sm:mt-[3%] mdd:mt-[10%] e:mt-[13%] 2xl:ml-[30%] sm:w-[400px]">
+    <div className="mt-[25%] border-2 ml-[10%] ee-only:ml-0 dee-only:mt-[25%] sm:mt-[3%] mdd:mt-[10%] e:mt-[13%] 2xl:ml-[30%] sm:w-[400px]">
       {/* Animated Greeting */}
       <AnimatePresence mode="wait">
         {greetings.map((greeting, index) =>

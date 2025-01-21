@@ -3,35 +3,44 @@ import mail from "../animations/mail.json";
 
 const Footer = () => {
   return (
-    <div className="px-10 dee-only:px-2 h-screen grid grid-rows-[auto_30%] bg-[#e7dfc6]  ">
-      <div className="flex justify-between items-end  px-[10%]">
-        <div className="text-[8rem] leading-[0.95] flex flex-col justify-end ">
-          <div className="flex items-center gap-[20px]">
-            <span>
-              <img
-                className="w-[130px] rounded-full"
-                src="/images/ai15.jpg"
-                alt="profile"
-              />
-            </span>
-            <p>Let&apos;s work</p>
+    <div className="px-10 dee-only:px-2 h-screen grid grid-rows-[auto_25%] bg-[#e7dfc6]  ">
+      <div className="border-2 flex items-end h-full border-black md-only:justify-center 3xl:px-[10%] max-2xl:px-[5%]">
+        <div className="flex justify-between items-center  2xl:px-[5%]">
+          <div className=" flex border-2 flex-col justify-end md-only:items-center md-only:w-full">
+            <div className="flex items-center gap-[20px]">
+              <span>
+                <img
+                  className="w-[130px] rounded-full"
+                  src="/images/ai15.jpg"
+                  alt="profile"
+                />
+              </span>
+              <p className="2xl:text-[8rem] 2xl:leading-[0.95] sm:text-[4.5rem] sm-only:text-[3rem]">
+                Let&apos;s work
+              </p>
+            </div>
+            <p className="mdd:text-[8rem] 2xl:leading-[0.95] mdd-only:text-[5rem]  sm:text-[2.5rem]  font-extrabold">
+              together
+            </p>
+            <div className="mt-[3rem]  flex gap-[30px] dee-only:flex-col  text-[1rem] dee-only:w-full">
+              <div className="flex items-center border-[#1F1F1F]  rounded-2xl">
+                <div className="border-2 text-center border-[#1F1F1F] rounded-full dee-only:w-full">
+                  <p className="p-6 px-8 rounded-full">mustaff2277@gmail.com</p>
+                </div>
+              </div>
+              <div className="flex items-center ">
+                <div className="border-2 text-center border-[#1F1F1F] rounded-full dee-only:w-full">
+                  <p className="p-6 px-8 text-nowrap">+233 24 619 1203</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <p>together</p>
-          <div className="mt-[3rem]  flex gap-[30px]  text-[1rem] ">
-            <div className="flex items-center border-[#1F1F1F]  rounded-2xl">
-              <p className="border-2 border-[#1F1F1F] p-6 px-8 rounded-full">
-                mustaff2277@gmail.com
-              </p>
-            </div>
-            <div className="flex items-center ">
-              <p className="border-2 border-[#1F1F1F] p-6 px-8 rounded-full">
-                +233 24 619 1203
-              </p>
-            </div>
+          <div className="w-[30%] md-only:hidden border-2 flex justify-center items-center ">
+            <Lottie animationData={mail} className="" loop={true} />
           </div>
         </div>
-        <Lottie animationData={mail} className="w-[500px]" loop={true} />
       </div>
+
       <div className="flex justify-between items-end mb-[20px]">
         <div>
           <p className="text-[#999999]">Version</p>
