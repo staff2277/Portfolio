@@ -3,7 +3,7 @@ import mail from "../animations/mail.json";
 
 const Footer = () => {
   return (
-    <div className="px-10 dee-only:px-2 h-screen grid grid-rows-[auto_25%] bg-[#e7dfc6]  ">
+    <div className="px-10 dee-only:px-2 h-screen grid grid-rows-[auto_25%] bg-[#e7dfc6] z-40 ">
       <div className="flex items-end h-full  md-only:justify-center 3xl:px-[10%] max-2xl:px-[5%]">
         <div className="flex justify-between items-center  2xl:px-[5%]">
           <div className=" flex flex-col justify-end md-only:items-center md-only:w-full">
