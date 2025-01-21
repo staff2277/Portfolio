@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 
 const App = () => {
   return (
-    <div className=" bg-[#e7dfc6] ">
+    <div className="  ">
       <BrowserRouter>
         <Navbar />
         <Routes>

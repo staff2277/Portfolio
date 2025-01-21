@@ -6,7 +6,7 @@ import Footer from "../../components/Footer";
 
 const Hero = () => {
   return (
-    <div className="h-screen   pt-5 ">
+    <div className="h-screen   pt-5 bg-[#e7dfc6]">
       <div className="flex px-10 dee-only:px-2 justify-between h-[100%] mddd-only:flex-col">
         <div className="flex flex-col justify-between seee-only:block pt-[5rem]">
           <HeroText />
