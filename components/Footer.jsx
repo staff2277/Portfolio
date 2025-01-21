@@ -1,9 +1,10 @@
 import Lottie from "lottie-react"; // Static import
 import mail from "../animations/mail.json";
+import { motion } from "framer-motion";
 
 const Footer = () => {
   return (
-    <div className="px-10 dee-only:px-2 h-screen grid grid-rows-[auto_25%] bg-[#e7dfc6] z-40 ">
+    <motion.div className="px-10 dee-only:px-2 h-screen grid grid-rows-[auto_25%] bg-[#e7dfc6] z-40 ">
       <div className="flex items-end h-full  md-only:justify-center 3xl:px-[10%] max-2xl:px-[5%]">
         <div className="flex justify-between items-center  2xl:px-[5%]">
           <div className=" flex flex-col justify-end md-only:items-center md-only:w-full">
@@ -49,14 +50,14 @@ const Footer = () => {
         <div>
           <p>Socials</p>
           <div className="flex mt-3 gap-7">
-            <a href="#">
+            <a href="https://www.linkedin.com/in/mustapha-osman-515308168/">
               <img
                 className="w-[50px] "
                 src="/linkedin.png"
                 alt="linkedin logo"
               />
             </a>
-            <a href="#">
+            <a href="https://x.com/Mustaff227">
               <img className="w-[50px] " src="/x2.svg" alt="x logo" />
             </a>
             <a href="#">
@@ -65,7 +66,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

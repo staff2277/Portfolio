@@ -17,7 +17,7 @@ const Navbar = () => {
     <>
       <nav
         className={clsx({
-          "flex px-10 dee-only:px-2 z-30 justify-between pt-3 items-center absolute top-0 left-0 right-0 h-[10%]": true,
+          "flex px-10 dee-only:px-2 z-30 justify-between pt-3 items-center absolute  top-0 left-0 right-0 h-[10%]": true,
           "bg-transparent   text-[#e7dfc6] ": location.pathname == "/about",
         })}
       >
@@ -32,25 +32,38 @@ const Navbar = () => {
           </div>
         </Link>
 
-        <div className="sm-only:block mdd:hidden">
+        <div
+          className={clsx({
+            "sm-only:block mdd:hidden": true,
+          })}
+        >
           <div
             onClick={toggleMenu}
             className="cursor-pointer space-y-2 flex flex-col items-center justify-center"
           >
             <div
-              className={`w-8 h-1 bg-black transition-all duration-300 ease-in-out ${
-                isOpen ? "transform rotate-45 translate-y-2" : ""
-              }`}
+              className={clsx(
+                "w-8 h-1 transition-all duration-300 ease-in-out",
+                { "transform rotate-45 translate-y-2": isOpen },
+                { "bg-[#e7dfc6]": location.pathname == "/about" },
+                { "bg-black": location.pathname == "/" }
+              )}
             ></div>
             <div
-              className={`w-8 h-1 bg-black transition-all duration-300 ease-in-out ${
-                isOpen ? "opacity-0" : ""
-              }`}
+              className={clsx(
+                "w-8 h-1 transition-all duration-300 ease-in-out",
+                { "opacity-0": isOpen },
+                { "bg-[#e7dfc6]": location.pathname == "/about" },
+                { "bg-black": location.pathname == "/" }
+              )}
             ></div>
             <div
-              className={`w-8 h-1 bg-black transition-all duration-300 ease-in-out ${
-                isOpen ? "transform -rotate-45 -translate-y-2" : ""
-              }`}
+              className={clsx(
+                "w-8 h-1  transition-all duration-300 ease-in-out",
+                { "transform -rotate-45 -translate-y-2": isOpen },
+                { "bg-[#e7dfc6]": location.pathname == "/about" },
+                { "bg-black": location.pathname == "/" }
+              )}
             ></div>
           </div>
         </div>
