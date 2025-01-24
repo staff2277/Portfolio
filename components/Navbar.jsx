@@ -19,21 +19,54 @@ const Navbar = () => {
 
   return (
     <>
-      <nav
+      <motion.nav
+        initial={{
+          y: "-200px",
+        }}
+        animate={{
+          y: "0px",
+        }}
+        transition={{
+          type: "spring",
+          bounce: 0.8,
+          duration: 2,
+        }}
         className={clsx({
           "flex px-10 dee-only:px-2 z-30 justify-between pt-3 items-center absolute  top-0 left-0 right-0 h-[10%]": true,
           "bg-transparent   text-[#e7dfc6] ": location.pathname == "/about",
         })}
       >
         <Link to="/">
-          <div className="">
+          <motion.div
+            initial={{
+              marginLeft: 0,
+              fontSize: "1.8rem",
+              color: "black",
+              rotate: "0deg",
+              x: "100px",
+            }}
+            animate={{
+              x: "0px",
+            }}
+            whileHover={{
+              marginLeft: "1.5rem",
+              fontSize: "3rem",
+              color: "white",
+              rotate: "-2deg",
+            }}
+            transition={{
+              type: "spring",
+              bounce: 0.8,
+            }}
+            className=""
+          >
             <p className="font-bold text-[1.15rem] sm-only:text-[.9rem]">
               MUSTAPHA OSMAN
             </p>
             <p className="text-[.9rem] text-center sm-only:text-[.75rem]">
               Front-End Developer
             </p>
-          </div>
+          </motion.div>
         </Link>
 
         <div
@@ -107,7 +140,7 @@ const Navbar = () => {
                   type: "spring",
                   bounce: 0.8,
                 }}
-                className="-fit "
+                className="w-fit "
                 to="/"
               >
                 Home
@@ -174,10 +207,58 @@ const Navbar = () => {
           })}
         >
           <li>
-            <Link to="/about">About</Link>
+            <MotionLink
+              initial={{
+                marginLeft: 0,
+                fontSize: "1rem",
+                color: "black",
+                rotate: "0deg",
+                x: "100px",
+              }}
+              animate={{
+                x: "0px",
+              }}
+              whileHover={{
+                marginLeft: "1rem",
+                fontSize: "1.3rem",
+                color: "white",
+                rotate: "-3deg",
+              }}
+              transition={{
+                type: "spring",
+                bounce: 0.8,
+              }}
+              to="/about"
+            >
+              About
+            </MotionLink>
           </li>
           <li>
-            <Link to="/contact">Contact</Link>
+            <MotionLink
+              initial={{
+                marginLeft: 0,
+                fontSize: "1rem",
+                color: "black",
+                rotate: "0deg",
+                x: "100px",
+              }}
+              animate={{
+                x: "0px",
+              }}
+              whileHover={{
+                marginLeft: "1rem",
+                fontSize: "1.3rem",
+                color: "white",
+                rotate: "-3deg",
+              }}
+              transition={{
+                type: "spring",
+                bounce: 0.8,
+              }}
+              to="/contact"
+            >
+              Contact
+            </MotionLink>
           </li>
           <li
             className={clsx(
@@ -199,7 +280,7 @@ const Navbar = () => {
             </a>
           </li>
         </ul>
-      </nav>
+      </motion.nav>
     </>
   );
 };
