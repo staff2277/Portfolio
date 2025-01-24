@@ -39,29 +39,31 @@ const services = [
 
 const Need = () => {
   return (
-    <div className="py-[10rem] px-10 dee-only:px-2 border-2  grid xl:grid-cols-[repeat(auto-fit,minmax(500px,1fr))]  grid-rows-2 gap-4 max-xl:grid-cols-[repeat(auto-fit,minmax(400px,1fr))] max-lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] bg-[#070707] text-white">
-      {services.map((service, index) => (
-        <div
-          key={index}
-          className="border-2 border-[#1F1F1F] rounded-lg p-[30px]"
-        >
-          <div className="flex items-center gap-5">
-            <span>
-              <img
-                className="w-[50px]"
-                src={service.icon}
-                alt={service.title.toLowerCase()}
-              />
-            </span>
-            <span className="font-extrabold text-[1.2rem]">
-              {service.title}
-            </span>
+    <div className="e:h-[100vh] flex w-full border-2 items-center bg-[#070707]">
+      <div className="py-[5rem] w-full px-10 dee-only:px-2 border-2  grid xl:grid-cols-[repeat(auto-fit,minmax(500px,1fr))]  grid-rows-2 gap-4 xl-only:grid-cols-[repeat(auto-fit,minmax(400px,1fr))] lg-only:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] bg-[#070707] text-white">
+        {services.map((service, index) => (
+          <div
+            key={index}
+            className="border-2 border-[#1F1F1F] rounded-lg p-[30px]"
+          >
+            <div className="flex items-center gap-5">
+              <span>
+                <img
+                  className="w-[50px]"
+                  src={service.icon}
+                  alt={service.title.toLowerCase()}
+                />
+              </span>
+              <span className="font-extrabold text-[1.2rem]">
+                {service.title}
+              </span>
+            </div>
+            <p className="my-5 text-[#999999] sm:text-[1rem] max-5s:text-[0.8rem]">
+              {service.description}
+            </p>
           </div>
-          <p className="my-5 text-[#999999] sm:text-[1rem] max-5s:text-[0.8rem]">
-            {service.description}
-          </p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

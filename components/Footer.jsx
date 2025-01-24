@@ -1,6 +1,5 @@
 import { motion, useTransform, useScroll } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import AnimatedMailIcon from "./AnimatedMailIcon";
 
 const Footer = () => {
   const location = useLocation();

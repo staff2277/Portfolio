@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+
 import Lottie from "lottie-react";
 import dot from "../animations/dot4.json";
 import clsx from "clsx";
+import { motion } from "framer-motion";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +14,8 @@ const Navbar = () => {
   };
 
   let location = useLocation();
+
+  const MotionLink = motion(Link);
 
   return (
     <>
@@ -46,7 +50,8 @@ const Navbar = () => {
                 "w-8 h-1 transition-all duration-300 ease-in-out",
                 { "transform rotate-45 translate-y-2": isOpen },
                 { "bg-[#e7dfc6]": location.pathname == "/about" },
-                { "bg-black": location.pathname == "/" }
+                { "bg-black": location.pathname == "/" },
+                { "bg-black": location.pathname == "/contact" }
               )}
             ></div>
             <div
@@ -54,7 +59,8 @@ const Navbar = () => {
                 "w-8 h-1 transition-all duration-300 ease-in-out",
                 { "opacity-0": isOpen },
                 { "bg-[#e7dfc6]": location.pathname == "/about" },
-                { "bg-black": location.pathname == "/" }
+                { "bg-black": location.pathname == "/" },
+                { "bg-black": location.pathname == "/contact" }
               )}
             ></div>
             <div
@@ -62,17 +68,109 @@ const Navbar = () => {
                 "w-8 h-1  transition-all duration-300 ease-in-out",
                 { "transform -rotate-45 -translate-y-2": isOpen },
                 { "bg-[#e7dfc6]": location.pathname == "/about" },
-                { "bg-black": location.pathname == "/" }
+                { "bg-black": location.pathname == "/" },
+                { "bg-black": location.pathname == "/contact" }
               )}
             ></div>
           </div>
         </div>
 
+        {isOpen && (
+          <motion.div
+            initial={{
+              x: "400px",
+            }}
+            animate={{
+              x: "0px",
+            }}
+            className="h-[50vh] mt-[5.5rem] text-[#e7dfc6] rounded-lg w-[50%] absolute top-0 right-0 bg-black"
+          >
+            <div className="flex flex-col text-[1.8rem]   *:pt-[2rem] ml-[1rem] gap-5">
+              <MotionLink
+                initial={{
+                  marginLeft: 0,
+                  fontSize: "1.8rem",
+                  color: "#e7dfc6",
+                  rotate: "0deg",
+                  x: "100px",
+                }}
+                animate={{
+                  x: "0px",
+                }}
+                whileHover={{
+                  marginLeft: "1.5rem",
+                  fontSize: "3rem",
+                  color: "white",
+                  rotate: "-2deg",
+                }}
+                transition={{
+                  type: "spring",
+                  bounce: 0.8,
+                }}
+                className="-fit "
+                to="/"
+              >
+                Home
+              </MotionLink>
+              <MotionLink
+                initial={{
+                  marginLeft: 0,
+                  fontSize: "1.8rem",
+                  color: "#e7dfc6",
+                  rotate: "0deg",
+                  x: "100px",
+                }}
+                animate={{
+                  x: "0px",
+                }}
+                whileHover={{
+                  marginLeft: "1.5rem",
+                  fontSize: "3rem",
+                  color: "white",
+                  rotate: "-2deg",
+                }}
+                transition={{
+                  type: "spring",
+                  bounce: 0.8,
+                }}
+                className="w-fit"
+                to="/about"
+              >
+                About
+              </MotionLink>
+              <MotionLink
+                initial={{
+                  marginLeft: 0,
+                  fontSize: "1.8rem",
+                  color: "#e7dfc6",
+                  rotate: "0deg",
+                  x: "100px",
+                }}
+                animate={{
+                  x: "0px",
+                }}
+                whileHover={{
+                  marginLeft: "1.5rem",
+                  fontSize: "3rem",
+                  color: "white",
+                  rotate: "-2deg",
+                }}
+                transition={{
+                  type: "spring",
+                  bounce: 0.8,
+                }}
+                className="w-fit"
+                to="/contact"
+              >
+                Contact
+              </MotionLink>
+            </div>
+          </motion.div>
+        )}
+
         <ul
           className={clsx("flex gap-14 items-center", {
             "mdd-only:hidden": true,
-            "flex-col absolute top-20 left-0 bg-white w-full p-4": isOpen,
-            "flex-row": !isOpen,
           })}
         >
           <li>

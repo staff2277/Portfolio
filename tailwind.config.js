@@ -41,6 +41,7 @@ export default {
         "e-only": { max: "1000px" }, // Applies up to 767px width
         "ee-only": { max: "1100px" }, // Applies up to 767px width
         "lg-only": { max: "1023px" }, // Applies up to 1023px width
+        "xl-only": { max: "1280px" }, // Applies up to 1023px width
       },
     },
   },
