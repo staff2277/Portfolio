@@ -52,7 +52,9 @@ const Footer = () => {
           <div
             id="footer-lottie"
             className="w-[30%] border-2 md-only:hidden flex justify-center items-center"
-          ></div>
+          >
+            added
+          </div>
         </div>
       </div>
 
