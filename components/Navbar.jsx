@@ -226,6 +226,7 @@ const Navbar = () => {
               }}
               transition={{
                 type: "spring",
+                bounce: 0.8,
               }}
               to="/about"
             >
