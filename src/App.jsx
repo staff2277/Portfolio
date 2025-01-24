@@ -1,21 +1,29 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Hero from "./pages/Hero";
-import Contact from "./pages/Contact";
-import About from "./pages/About";
 import Navbar from "../components/Navbar";
+import { Suspense, lazy, useState } from "react";
+
+const Hero = lazy(() => import("./pages/Hero"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 const App = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div className="  ">
-      <BrowserRouter>
-        <Navbar />
+    <BrowserRouter>
+      <Navbar isOpen={isOpen} toggleMenu={toggleMenu} />
+      <Suspense fallback={<div>Loading...</div>}>
         <Routes>
-          <Route path="/" element={<Hero />}></Route>
-          <Route path="/about" element={<About />}></Route>
-          <Route path="/contact" element={<Contact />}></Route>
+          <Route path="/" element={<Hero />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
-      </BrowserRouter>
-    </div>
+      </Suspense>
+    </BrowserRouter>
   );
 };
 
