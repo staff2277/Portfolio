@@ -1,21 +1,12 @@
 import heroImg from "/images/aibg1.png";
-import Lottie from "lottie-react";
-import arrow from "../animations/arrow1.json";
-import { useEffect, useState } from "react";
 
 const HeroImg = () => {
   return (
     <div className="flex justify-between items-end sm:justify-end relative w-full h-[90%] overflow-hidden">
-      <span id="hero-lottie" className="bg-[#e7dfc6] rounded-3xl mddd:hidden">
-        {/* Render Lottie only when it's visible */}
-        {/* {isLottieVisible && (
-          <Lottie
-            animationData={arrow}
-            className="w-[5rem] sm-only:w-[3rem]"
-            loop={true}
-          />
-        )} */}
-      </span>
+      <span
+        id="hero-lottie"
+        className="bg-[#e7dfc6] rounded-3xl mddd:hidden"
+      ></span>
       <img
         src={heroImg}
         alt="Hero Image"

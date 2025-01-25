@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import Lottie from "lottie-react";
@@ -41,7 +41,6 @@ const Navbar = () => {
             initial={{
               marginLeft: 0,
               fontSize: "1.8rem",
-              color: "black",
               rotate: "0deg",
               x: "100px",
             }}
@@ -51,16 +50,21 @@ const Navbar = () => {
             whileHover={{
               marginLeft: "1.5rem",
               fontSize: "3rem",
-              color: "white",
               rotate: "-2deg",
             }}
             transition={{
               type: "spring",
               bounce: 0.8,
             }}
-            className=""
+            className={clsx({
+              "text-black ": location.pathname == "/",
+            })}
           >
-            <p className="font-bold text-[1.15rem] sm-only:text-[.9rem]">
+            <p
+              className={clsx({
+                "font-bold text-bl text-[1.15rem] sm-only:text-[.9rem]": true,
+              })}
+            >
               MUSTAPHA OSMAN
             </p>
             <p className="text-[.9rem] text-center sm-only:text-[.75rem]">
@@ -211,7 +215,6 @@ const Navbar = () => {
               initial={{
                 marginLeft: 0,
                 fontSize: "1rem",
-                color: "black",
                 rotate: "0deg",
                 x: "100px",
               }}
@@ -238,7 +241,6 @@ const Navbar = () => {
               initial={{
                 marginLeft: 0,
                 fontSize: "1rem",
-                color: "black",
                 rotate: "0deg",
                 x: "100px",
               }}

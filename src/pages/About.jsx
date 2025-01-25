@@ -1,11 +1,8 @@
-import { useRef } from "react";
 import Footer from "../../components/Footer";
 import bgImage from "/bgImage.jpg";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 const About = () => {
-  const page1 = useRef(null);
-
   const { scrollYProgress } = useScroll();
   const page1Scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   const page1rotate = useTransform(scrollYProgress, [0, 1], ["0deg", "3deg"]);
@@ -15,7 +12,6 @@ const About = () => {
   return (
     <motion.div className="">
       <motion.div
-        ref={page1}
         style={{
           backgroundImage: `url(${bgImage})`,
           backgroundPosition: "center",
@@ -32,7 +28,7 @@ const About = () => {
         </div>
       </motion.div>
       <div className="z-30">
-        <Footer scrollProgress={scrollYProgress} />
+        <Footer />
       </div>
     </motion.div>
   );

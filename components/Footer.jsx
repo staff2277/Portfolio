@@ -8,10 +8,22 @@ const Footer = () => {
   const page2Scale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
   const page2rotate = useTransform(scrollYProgress, [0, 1], ["5deg", "0deg"]);
 
-  const transStyle = {
-    scale: location.pathname === "/about" ? page2Scale : 1,
-    rotate: location.pathname === "/about" ? page2rotate : "0deg",
-  };
+  const page3Scale = useTransform(scrollYProgress, [0, 1], [0.5, 1]);
+  const page3rotate = useTransform(scrollYProgress, [0, 1], ["5deg", "0deg"]);
+
+  let transStyle;
+
+  if (location.pathname === "/about") {
+    transStyle = {
+      scale: location.pathname === "/about" ? page2Scale : 1,
+      rotate: location.pathname === "/about" ? page2rotate : "0deg",
+    };
+  } else if (location.pathname === "/") {
+    transStyle = {
+      scale: location.pathname === "/" ? page3Scale : 1,
+      rotate: location.pathname === "/" ? page3rotate : "0deg",
+    };
+  }
 
   return (
     <motion.div
@@ -51,9 +63,9 @@ const Footer = () => {
           </div>
           <div
             id="footer-lottie"
-            className="w-[30%] border-2 md-only:hidden flex justify-center items-center"
+            className="w-[30%]  md-only:hidden flex justify-center items-center"
           >
-            <img src="" alt="" />
+            <img className="" src="/arrow.png" alt="arrow down" />
           </div>
         </div>
       </div>
