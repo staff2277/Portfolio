@@ -53,7 +53,7 @@ const Footer = () => {
             id="footer-lottie"
             className="w-[30%] border-2 md-only:hidden flex justify-center items-center"
           >
-            added
+            <img src="" alt="" />
           </div>
         </div>
       </div>
