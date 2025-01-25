@@ -1,4 +1,5 @@
 import Footer from "../../components/Footer";
+import Passion from "../../components/Passion";
 import bgImage from "/bgImage.jpg";
 import { motion, useScroll, useTransform } from "framer-motion";
 
@@ -10,7 +11,7 @@ const About = () => {
   console.log(scrollYProgress);
 
   return (
-    <motion.div className="">
+    <motion.div className="bg-black">
       <motion.div
         style={{
           backgroundImage: `url(${bgImage})`,
@@ -27,6 +28,9 @@ const About = () => {
           </div>
         </div>
       </motion.div>
+      <div>
+        <Passion />
+      </div>
       <div className="z-30">
         <Footer />
       </div>
