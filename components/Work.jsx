@@ -30,7 +30,7 @@ const Work = () => {
       </div>
       <div className="relative pl-[10rem] flex flex-col border-y-[1px] border-[#1F1F1F] w-[70%] space-y-4">
         {items.map((item, index) => (
-          <a href="#" key={index}>
+          <a href="https://streamvibbe.netlify.app/" key={index}>
             <motion.div
               initial={{
                 scale: 1,
@@ -53,17 +53,20 @@ const Work = () => {
               onMouseEnter={() => setHoveredItem(item)}
               onMouseLeave={() => setHoveredItem(null)}
             >
-              <motion.h2
-                className="text-[#e7dfc6] py-[2rem]  italic z-30 3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] font-extrabold  group-hover:opacity-80 transition"
-                initial={{
-                  color: "#333333",
-                }}
-                whileHover={{
-                  color: "#e7dfc6",
-                }}
-              >
-                {item.title}
-              </motion.h2>
+              <motion.div className="w-full py-[2rem]">
+                <motion.h2
+                  className="text-[#e7dfc6]   italic z-30 3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] font-extrabold  group-hover:opacity-80 transition"
+                  initial={{
+                    color: "#333333",
+                  }}
+                  whileHover={{
+                    color: "#e7dfc6",
+                  }}
+                >
+                  {item.title}
+                </motion.h2>
+                <span className="text-[#504f4f] ">Currently Building</span>
+              </motion.div>
             </motion.div>
           </a>
         ))}
