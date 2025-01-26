@@ -30,7 +30,11 @@ const Work = () => {
       </div>
       <div className="relative pl-[10rem] flex flex-col border-y-[1px] border-[#1F1F1F] w-[70%] space-y-4">
         {items.map((item, index) => (
-          <a href="https://streamvibbe.netlify.app/" key={index}>
+          <a
+            href="https://streamvibbe.netlify.app/"
+            target="_blank"
+            key={index}
+          >
             <motion.div
               initial={{
                 scale: 1,
