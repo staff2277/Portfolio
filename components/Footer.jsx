@@ -88,8 +88,8 @@ const Footer = () => {
             <a href="https://x.com/Mustaff227">
               <img className="w-[50px] " src="/x2.svg" alt="x logo" />
             </a>
-            <a href="#">
-              <img className="w-[50px] " src="/insta.svg" alt="insta logo" />
+            <a href="https://github.com/staff2277">
+              <img className="w-[50px] " src="/github.svg" alt="github logo" />
             </a>
           </div>
         </div>
