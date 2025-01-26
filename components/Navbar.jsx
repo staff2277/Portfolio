@@ -236,8 +236,17 @@ const Navbar = () => {
               About
             </MotionLink>
           </li>
+
           <li>
             <MotionLink
+              className={clsx(
+                "pl-5 pr-9 py-0 dee-only:px-4 dee-only:pl-2 flex items-center rounded-full",
+                {
+                  "text-black bg-[#e7dfc6]": location.pathname === "/about",
+                  "bg-[#f0ede4]": location.pathname === "/",
+                  "bg-[#f0ede3]": location.pathname === "/contact",
+                }
+              )}
               initial={{
                 marginLeft: 0,
                 fontSize: "1rem",
@@ -259,27 +268,13 @@ const Navbar = () => {
               }}
               to="/contact"
             >
-              Contact
+              <Lottie
+                animationData={dot}
+                loop={true}
+                className="w-14 dee-only:w-10 sm-only:w-12"
+              />
+              <span className="dee-only:text-[.8rem]">Available For Work</span>
             </MotionLink>
-          </li>
-          <li
-            className={clsx(
-              "pl-5 pr-9 py-0 dee-only:px-4 dee-only:pl-2 flex items-center rounded-full",
-              {
-                "text-black bg-[#e7dfc6]": location.pathname === "/about",
-                "bg-[#f0ede4]": location.pathname === "/",
-                "bg-[#f0ede3]": location.pathname === "/contact",
-              }
-            )}
-          >
-            <Lottie
-              animationData={dot}
-              loop={true}
-              className="w-14 dee-only:w-10 sm-only:w-12"
-            />
-            <a href="#" className="dee-only:text-[.8rem]">
-              Available For Work
-            </a>
           </li>
         </ul>
       </motion.nav>

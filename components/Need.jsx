@@ -41,10 +41,10 @@ const services = [
 
 const Need = () => {
   const { scrollYProgress } = useScroll();
-  const page2Scale = useTransform(scrollYProgress, [0, 0.5], [0.7, 1]);
+  const page2Scale = useTransform(scrollYProgress, [0, 0.3], [0.7, 1]);
   const page2rotate = useTransform(
     scrollYProgress,
-    [0, 0.5],
+    [0, 0.3],
     ["10deg", "0deg"]
   );
 
@@ -55,7 +55,7 @@ const Need = () => {
 
   return (
     <motion.div
-      className="e:h-[100vh] w-full sticky top-0 bg-[#070707]"
+      className="e:h-[100vh] w-full  sticky top-0 bg-[#070707]"
       style={transStyle}
     >
       <h1 className="py-[4rem] text-[#e7dfc6] z-20   3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] ml-[2rem] font-extrabold">

@@ -22,11 +22,8 @@ const Work = () => {
           initial={{
             scale: 1,
             rotate: "0deg",
-            x: "200px",
           }}
-          whileInView={{
-            x: "0px",
-          }}
+          whileInView={{}}
         >
           Work
         </motion.h1>
