@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import Lottie from "lottie-react";
@@ -120,7 +120,7 @@ const Navbar = () => {
             animate={{
               x: "0px",
             }}
-            className="h-[50vh] mt-[5.5rem] text-[#e7dfc6] rounded-lg w-[50%] absolute top-0 right-0 bg-black"
+            className="h-[50vh] mdd-only:hidden  mt-[5.5rem] text-[#e7dfc6] rounded-lg w-[50%] absolute top-0 right-0 bg-black"
           >
             <div className="flex flex-col text-[1.8rem]   *:pt-[2rem] ml-[1rem] gap-5">
               <MotionLink

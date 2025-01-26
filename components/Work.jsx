@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 const items = [{ title: "STREAMVIBE", image: "/streamVibe.png" }];
@@ -13,12 +13,12 @@ const Work = () => {
 
   return (
     <div
-      className="h-[80vh]  bg-black text-white"
+      className="h-[80vh]   bg-black text-white"
       onMouseMove={handleMouseMove}
     >
       <div>
         <motion.h1
-          className="text-[#e7dfc6] ml-[2rem] z-20 py-[2rem] 3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] f"
+          className="text-[#e7dfc6] mt-[4rem] ml-[2rem] z-40 py-[2rem] 3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] f"
           initial={{
             scale: 1,
             rotate: "0deg",

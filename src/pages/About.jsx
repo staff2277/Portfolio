@@ -11,7 +11,8 @@ const About = () => {
   console.log(scrollYProgress);
 
   return (
-    <motion.div className="bg-black">
+    <motion.div className="relative">
+      <div className="absolute inset-0 bg-black z-[-10]"></div>
       <motion.div
         style={{
           backgroundImage: `url(${bgImage})`,
@@ -31,7 +32,7 @@ const About = () => {
       <div>
         <Passion />
       </div>
-      <div className="z-30">
+      <div className="z-30 bg-black">
         <Footer />
       </div>
     </motion.div>

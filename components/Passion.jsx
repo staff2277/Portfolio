@@ -1,9 +1,19 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const Passion = () => {
+  const { scrollYProgress } = useScroll();
+  const pageScale = useTransform(scrollYProgress, [0, 0.5], [0.7, 1]);
+  const pagerotate = useTransform(scrollYProgress, [0, 0.5], ["10deg", "0deg"]);
+
   return (
-    <div className="h-[100vh] overflow-hidden">
-      <div className="grid grid-cols-[50%_auto] items-center justify-between text-[#e7dfc6]">
+    <motion.div
+      className="h-[100vh] sticky top-0 sm-only:min-h-[100vh] overflow-hidden bg-black"
+      style={{
+        scale: pageScale,
+        rotate: pagerotate,
+      }}
+    >
+      <div className="grid  sm:grid-cols-[50%_auto] sm-only:grid-rows-2 items-center justify-between text-[#e7dfc6]">
         <div className=" ml-[2rem]">
           <div className="">
             <h1 className="3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] font-extrabold">
@@ -53,11 +63,11 @@ const Passion = () => {
             </motion.p>
           </div>
         </div>
-        <div className="">
+        <div className="sm-only:mt-2rem">
           <img className="sticky top-0" src="/images/ai15.jpg" alt="image" />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
