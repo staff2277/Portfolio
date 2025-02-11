@@ -1,7 +1,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const items = [{ title: "STREAMVIBE", image: "/streamVibe.png" }];
+const items = [
+  {
+    title: "GEOPLANARCS",
+    href: "https://streamvibbe.netlify.app/",
+    image: "/geoplanarcs.png",
+  },
+  {
+    title: "STREAMVIBE",
+    href: "https://streamvibbe.netlify.app/",
+    image: "/streamVibe.png",
+  },
+];
 
 const Work = () => {
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -13,7 +24,7 @@ const Work = () => {
 
   return (
     <div
-      className="h-[80vh]   bg-black text-white"
+      className="h-[100vh]   bg-black text-white"
       onMouseMove={handleMouseMove}
     >
       <div>
@@ -30,11 +41,7 @@ const Work = () => {
       </div>
       <div className="relative pl-[10rem] flex flex-col border-y-[1px] border-[#1F1F1F] w-[70%] space-y-4">
         {items.map((item, index) => (
-          <a
-            href="https://streamvibbe.netlify.app/"
-            target="_blank"
-            key={index}
-          >
+          <a href={item.href} target="_blank" key={index}>
             <motion.div
               initial={{
                 scale: 1,
@@ -69,7 +76,9 @@ const Work = () => {
                 >
                   {item.title}
                 </motion.h2>
-                <span className="text-[#504f4f] ">Currently Building</span>
+                {item.title === "STREAMVIBE" && (
+                  <span className="text-[#504f4f] ">Currently Building</span>
+                )}
               </motion.div>
             </motion.div>
           </a>
