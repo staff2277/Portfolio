@@ -39,9 +39,14 @@ const Work = () => {
           Work
         </motion.h1>
       </div>
-      <div className="relative pl-[10rem] flex flex-col border-y-[1px] border-[#1F1F1F] w-[70%] space-y-4">
+      <div className="relative pl-[10rem] flex flex-col  w-[70%] space-y-4">
         {items.map((item, index) => (
-          <a href={item.href} target="_blank" key={index}>
+          <a
+            href={item.href}
+            target="_blank"
+            key={index}
+            className="border-y-[1px] border-[#1F1F1F]"
+          >
             <motion.div
               initial={{
                 scale: 1,
