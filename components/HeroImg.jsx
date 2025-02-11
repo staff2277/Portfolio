@@ -16,7 +16,6 @@ const HeroImg = () => {
       <div className="absolute top-10 left-[-5px] sm:top-24 sm:left-[10%] w-[110px] text-[.7rem] text-center see:text-[.9rem] seee:text-[1rem] mddd:hidden">
         &quot;I Build user-friendly, responsive web experiences&quot;
       </div>
-      <div>casasxas</div>
     </div>
   );
 };
