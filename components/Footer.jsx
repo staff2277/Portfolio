@@ -78,17 +78,20 @@ const Footer = () => {
         <div>
           <p>Socials</p>
           <div className="flex mt-3 gap-7">
-            <a href="https://www.linkedin.com/in/mustapha-osman-515308168/">
+            <a
+              href="https://www.linkedin.com/in/mustapha-osman-515308168/"
+              target="_blank"
+            >
               <img
                 className="w-[50px] "
                 src="/linkedin.png"
                 alt="linkedin logo"
               />
             </a>
-            <a href="https://x.com/Mustaff227">
+            <a href="https://x.com/Mustaff227" target="_blank">
               <img className="w-[50px] " src="/x2.svg" alt="x logo" />
             </a>
-            <a href="https://github.com/staff2277">
+            <a href="https://github.com/staff2277" target="_blank">
               <img className="w-[50px] " src="/github.svg" alt="github logo" />
             </a>
           </div>
