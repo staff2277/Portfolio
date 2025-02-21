@@ -10,7 +10,7 @@ const HeroFooter = () => {
       </div>
       <p className=" w-[50%] ee-only:w-[70%] p-5 rounded-full text-center see-only:w-full seee-only:leading-none mddd-only:p-0 see-only:text-xs mddd-only:hidden ">
         &ldquo;I am a Front-end developer passionate about crafting
-        user-friendly, responsive web experiences.&ldquo;
+        user-friendly and responsive web experiences.&ldquo;
       </p>
     </div>
   );
