@@ -9,7 +9,7 @@ const items = [
   },
   {
     title: "STREAMVIBE",
-    href: "https://streamvibbe.netlify.app/",
+    href: "https://streamvibe-backend-q0e9.onrender.com",
     image: "/streamVibe.png",
   },
 ];
