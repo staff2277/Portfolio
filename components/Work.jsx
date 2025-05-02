@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 const items = [
   {
     title: "GEOPLANARCS",
-    href: "https://streamvibbe.netlify.app/",
+    href: "https://geoplanarcs.netlify.app/",
     image: "/geoplanarcs.png",
   },
   {
