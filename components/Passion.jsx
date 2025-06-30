@@ -32,7 +32,7 @@ const Passion = () => {
                 x: "0px",
               }}
             >
-              I might not be the designer obsessing over pixels in Illustrator,
+              I might not be the designer obsessing over every pixel in Figma,
               but I design with purpose. You’ll usually find me buried in
               stylesheets, refining font sizes, and experimenting with layouts.
               My passion lies in delivering smooth, intuitive user
