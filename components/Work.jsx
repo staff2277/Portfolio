@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const items = [
@@ -22,9 +22,17 @@ const Work = () => {
     setCursorPosition({ x: e.clientX, y: e.clientY });
   };
 
+  // ✅ Preload images on mount
+  useEffect(() => {
+    items.forEach((item) => {
+      const img = new Image();
+      img.src = item.image;
+    });
+  }, []);
+
   return (
     <div
-      className="h-[100vh]   bg-black text-white"
+      className="h-[100vh] bg-black text-white"
       onMouseMove={handleMouseMove}
     >
       <div>
@@ -34,12 +42,12 @@ const Work = () => {
             scale: 1,
             rotate: "0deg",
           }}
-          whileInView={{}}
         >
           Work
         </motion.h1>
       </div>
-      <div className="relative pl-[10rem] flex flex-col  w-[70%] space-y-4">
+
+      <div className="relative pl-[10rem] flex flex-col w-[70%] space-y-4">
         {items.map((item, index) => (
           <a
             href={item.href}
@@ -64,14 +72,13 @@ const Work = () => {
                 type: "spring",
                 bounce: 0.8,
               }}
-              key={index}
               className="relative w-fil group cursor-pointer"
               onMouseEnter={() => setHoveredItem(item)}
               onMouseLeave={() => setHoveredItem(null)}
             >
               <motion.div className="w-full py-[2rem]">
                 <motion.h2
-                  className="text-[#e7dfc6]   italic z-30 3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] font-extrabold  group-hover:opacity-80 transition"
+                  className="text-[#e7dfc6] italic z-30 3xl:text-[5rem] 2xl:text-[4.5rem] xl:text-[4rem] mddd:text-[3rem] de:text-[2.5rem] de-only:text-[2rem] font-extrabold group-hover:opacity-80 transition"
                   initial={{
                     color: "#333333",
                   }}
@@ -82,7 +89,7 @@ const Work = () => {
                   {item.title}
                 </motion.h2>
                 {item.title === "STREAMVIBE" && (
-                  <span className="text-[#504f4f] ">Currently Building</span>
+                  <span className="text-[#504f4f]">Currently Building</span>
                 )}
               </motion.div>
             </motion.div>
@@ -93,9 +100,9 @@ const Work = () => {
           <motion.img
             src={hoveredItem.image}
             alt={hoveredItem.title}
-            className="absolute pointer-events-none z-0 overflow-hidden  w-[80%] rounded-lg shadow-lg"
+            className="absolute pointer-events-none z-0 overflow-hidden w-[80%] rounded-lg shadow-lg"
             style={{
-              top: cursorPosition.y - 500, // Adjusts position relative to cursor
+              top: cursorPosition.y - 500,
               left: cursorPosition.x - 500,
             }}
             initial={{ opacity: 0, scale: 0.8 }}
