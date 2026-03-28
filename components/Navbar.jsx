@@ -5,6 +5,7 @@ import Lottie from "lottie-react";
 import dot from "../animations/dot4.json";
 import clsx from "clsx";
 import { motion } from "framer-motion";
+import Magnetic from "./Magnetic";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,10 +34,11 @@ const Navbar = () => {
         }}
         className={clsx({
           "flex px-10 dee-only:px-2 z-30 justify-between pt-3 items-center absolute  top-0 left-0 right-0 h-[10%]": true,
-          "bg-transparent   text-[#e7dfc6] ": location.pathname == "/about",
+          "bg-transparent   text-[#e7dfc6] ": ["/about", "/projects", "/services"].includes(location.pathname),
         })}
       >
-        <Link to="/">
+        <Magnetic>
+          <Link to="/">
           <motion.div
             initial={{
               marginLeft: 0,
@@ -72,6 +74,7 @@ const Navbar = () => {
             </p>
           </motion.div>
         </Link>
+        </Magnetic>
 
         <div
           className={clsx({
@@ -86,27 +89,24 @@ const Navbar = () => {
               className={clsx(
                 "w-8 h-1 transition-all duration-300 ease-in-out",
                 { "transform rotate-45 translate-y-2": isOpen },
-                { "bg-[#e7dfc6]": location.pathname == "/about" },
-                { "bg-black": location.pathname == "/" },
-                { "bg-black": location.pathname == "/contact" }
+                { "bg-[#e7dfc6]": ["/about", "/projects", "/services"].includes(location.pathname) },
+                { "bg-black": ["/", "/contact"].includes(location.pathname) }
               )}
             ></div>
             <div
               className={clsx(
                 "w-8 h-1 transition-all duration-300 ease-in-out",
                 { "opacity-0": isOpen },
-                { "bg-[#e7dfc6]": location.pathname == "/about" },
-                { "bg-black": location.pathname == "/" },
-                { "bg-black": location.pathname == "/contact" }
+                { "bg-[#e7dfc6]": ["/about", "/projects", "/services"].includes(location.pathname) },
+                { "bg-black": ["/", "/contact"].includes(location.pathname) }
               )}
             ></div>
             <div
               className={clsx(
                 "w-8 h-1  transition-all duration-300 ease-in-out",
                 { "transform -rotate-45 -translate-y-2": isOpen },
-                { "bg-[#e7dfc6]": location.pathname == "/about" },
-                { "bg-black": location.pathname == "/" },
-                { "bg-black": location.pathname == "/contact" }
+                { "bg-[#e7dfc6]": ["/about", "/projects", "/services"].includes(location.pathname) },
+                { "bg-black": ["/", "/contact"].includes(location.pathname) }
               )}
             ></div>
           </div>
@@ -197,6 +197,58 @@ const Navbar = () => {
                   bounce: 0.8,
                 }}
                 className="w-fit"
+                to="/projects"
+              >
+                Projects
+              </MotionLink>
+              <MotionLink
+                initial={{
+                  marginLeft: 0,
+                  fontSize: "1.8rem",
+                  color: "#e7dfc6",
+                  rotate: "0deg",
+                  x: "100px",
+                }}
+                animate={{
+                  x: "0px",
+                }}
+                whileHover={{
+                  marginLeft: "1.5rem",
+                  fontSize: "3rem",
+                  color: "white",
+                  rotate: "-2deg",
+                }}
+                transition={{
+                  type: "spring",
+                  bounce: 0.8,
+                }}
+                className="w-fit"
+                to="/services"
+              >
+                Services
+              </MotionLink>
+              <MotionLink
+                initial={{
+                  marginLeft: 0,
+                  fontSize: "1.8rem",
+                  color: "#e7dfc6",
+                  rotate: "0deg",
+                  x: "100px",
+                }}
+                animate={{
+                  x: "0px",
+                }}
+                whileHover={{
+                  marginLeft: "1.5rem",
+                  fontSize: "3rem",
+                  color: "white",
+                  rotate: "-2deg",
+                }}
+                transition={{
+                  type: "spring",
+                  bounce: 0.8,
+                }}
+                className="w-fit"
                 to="/contact"
               >
                 Contact
@@ -236,17 +288,71 @@ const Navbar = () => {
               About
             </MotionLink>
           </li>
-
+          
           <li>
             <MotionLink
-              className={clsx(
-                "pl-5 pr-9 py-0 dee-only:px-4 dee-only:pl-2 flex items-center rounded-full",
-                {
-                  "text-black bg-[#e7dfc6]": location.pathname === "/about",
-                  "bg-[#f0ede4]": location.pathname === "/",
-                  "bg-[#f0ede3]": location.pathname === "/contact",
-                }
-              )}
+              initial={{
+                marginLeft: 0,
+                fontSize: "1rem",
+                rotate: "0deg",
+                x: "100px",
+              }}
+              animate={{
+                x: "0px",
+              }}
+              whileHover={{
+                marginLeft: "1rem",
+                fontSize: "1.3rem",
+                color: "white",
+                rotate: "-3deg",
+              }}
+              transition={{
+                type: "spring",
+                bounce: 0.8,
+              }}
+              to="/projects"
+            >
+              Projects
+            </MotionLink>
+          </li>
+          <li>
+            <MotionLink
+              initial={{
+                marginLeft: 0,
+                fontSize: "1rem",
+                rotate: "0deg",
+                x: "100px",
+              }}
+              animate={{
+                x: "0px",
+              }}
+              whileHover={{
+                marginLeft: "1rem",
+                fontSize: "1.3rem",
+                color: "white",
+                rotate: "-3deg",
+              }}
+              transition={{
+                type: "spring",
+                bounce: 0.8,
+              }}
+              to="/services"
+            >
+              Services
+            </MotionLink>
+          </li>
+
+          <li>
+            <Magnetic>
+              <MotionLink
+                className={clsx(
+                  "pl-5 pr-9 py-0 dee-only:px-4 dee-only:pl-2 flex items-center rounded-full",
+                  {
+                    "text-black bg-[#e7dfc6]": location.pathname === "/about",
+                    "bg-[#f0ede4]": location.pathname === "/",
+                    "bg-[#f0ede3]": location.pathname === "/contact",
+                  }
+                )}
               initial={{
                 marginLeft: 0,
                 fontSize: "1rem",
@@ -275,6 +381,7 @@ const Navbar = () => {
               />
               <span className="dee-only:text-[.8rem]">Available For Work</span>
             </MotionLink>
+            </Magnetic>
           </li>
         </ul>
       </motion.nav>
