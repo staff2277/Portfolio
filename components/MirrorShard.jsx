@@ -26,37 +26,61 @@ export default function MirrorShard({ position, rotation, scale }) {
     geo.computeVertexNormals();
     return geo;
   }, [scale]);
+  const initialRot = useMemo(() => new THREE.Euler(...rotation), [rotation]);
+  const smoothedPointer = useRef(new THREE.Vector2(0, 0));
+  const offset = useRef(new THREE.Vector3(0, 0, 0));
+  const timeOffset = useMemo(() => Math.random() * 10, []);
 
   useFrame((state, delta) => {
     if (!meshRef.current) return;
     
-    // Gentle constant rotation
-    meshRef.current.rotation.x += delta * 0.2;
-    meshRef.current.rotation.y += delta * 0.3;
-
-    // Calculate pointer in 3D space at z=0 equivalent
+    // Smooth the pointer
+    smoothedPointer.current.lerp(state.pointer, delta * 15);
+    
+    // 1. Calculate Individual Floating Motion
+    const t = state.clock.getElapsedTime() + timeOffset;
+    const floatX = Math.sin(t * 0.5) * 0.2;
+    const floatY = Math.cos(t * 0.6) * 0.2;
+    const floatZ = Math.sin(t * 0.7) * 0.1;
+    
+    // 2. Calculate Interactive Repulsion
     const pointer = new THREE.Vector3(
-      (state.pointer.x * state.viewport.width) / 2,
-      (state.pointer.y * state.viewport.height) / 2,
+      (smoothedPointer.current.x * state.viewport.width) / 2,
+      (smoothedPointer.current.y * state.viewport.height) / 2,
       0
     );
     
-    // Project mouse relative to camera depth
     const distance = pointer.distanceTo(meshRef.current.position);
-    const interactionRadius = 3.0;
+    const interactionRadius = 5.0;
+    
+    const targetOffset = new THREE.Vector3(0, 0, 0);
+    const tiltTarget = new THREE.Euler().copy(initialRot);
 
     if (distance < interactionRadius) {
-      // Shard reacts by getting repelled or tilted
       const dir = new THREE.Vector3().subVectors(meshRef.current.position, pointer).normalize();
-      const intensity = (interactionRadius - distance) / interactionRadius;
+      const intensity = Math.pow((interactionRadius - distance) / interactionRadius, 1.5);
       
-      meshRef.current.position.add(dir.multiplyScalar(intensity * delta * 5));
-      meshRef.current.rotation.x += dir.y * intensity * delta * 2;
-      meshRef.current.rotation.y -= dir.x * intensity * delta * 2;
-    } else {
-      // Float back to initial position using spring-like lerp
-      meshRef.current.position.lerp(initialPos, delta * 0.8);
+      // Repel from mouse - we add to the target offset
+      targetOffset.add(dir.multiplyScalar(intensity * 3));
+      
+      // Tilt towards mouse direction
+      tiltTarget.x += dir.y * intensity * 1.5;
+      tiltTarget.y -= dir.x * intensity * 1.5;
     }
+
+    // Combine floating and interaction offsets
+    const finalTargetPos = new THREE.Vector3().addVectors(initialPos, targetOffset);
+    finalTargetPos.x += floatX;
+    finalTargetPos.y += floatY;
+    finalTargetPos.z += floatZ;
+
+    // Smooth transition for position and rotation
+    const lerpSpeed = 1 - Math.exp(-delta * 3.5);
+    meshRef.current.position.lerp(finalTargetPos, lerpSpeed);
+    
+    // Smoothly rotate
+    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, tiltTarget.x + t * 0.1, lerpSpeed);
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, tiltTarget.y + t * 0.15, lerpSpeed);
   });
 
   return (
@@ -64,14 +88,14 @@ export default function MirrorShard({ position, rotation, scale }) {
       <primitive object={geometry} />
       <meshPhysicalMaterial 
         color="#e0ffff"
-        transmission={0.8}
+        transmission={0.4} // Reduced transmission for better performance
         opacity={1}
         metalness={0.9}
-        roughness={0.05}
-        ior={2.5}
-        thickness={2}
-        clearcoat={1}
-        envMapIntensity={2}
+        roughness={0.02}
+        ior={1.8}
+        thickness={1.5}
+        clearcoat={0.8}
+        envMapIntensity={1.5}
       />
     </mesh>
   );

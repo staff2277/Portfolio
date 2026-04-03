@@ -40,6 +40,13 @@ export default function Navbar() {
               <span className="absolute top-0 left-0 z-10 transition-transform duration-300 translate-y-full group-hover:translate-y-0 text-[var(--accent)] inline-block">
                 {link.name}
               </span>
+              {isActive && (
+                <motion.div 
+                  layoutId="activeDot"
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[var(--accent)] rounded-full"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
             </Link>
           );
         })}
