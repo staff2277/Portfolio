@@ -16,18 +16,24 @@ export default function Scene() {
       >
         <Suspense fallback={null}>
           <ambientLight intensity={1.5} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
+          <spotLight
+            position={[10, 10, 10]}
+            angle={0.15}
+            penumbra={1}
+            intensity={2}
+            castShadow
+          />
           <pointLight position={[-10, -10, -10]} intensity={1} />
-          
+
           <Model position={[0, -1, 0]} rotation={[0, 0, 0]} />
 
-          <Environment preset="city" />
-          <ContactShadows 
-            position={[0, -1.2, 0]} 
-            opacity={0.5} 
-            scale={10} 
-            blur={2} 
-            far={4} 
+          <Environment preset="night" />
+          <ContactShadows
+            position={[0, -1.21, 0]}
+            opacity={0.5}
+            scale={10}
+            blur={2}
+            far={4}
           />
         </Suspense>
       </Canvas>
