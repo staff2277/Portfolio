@@ -9,7 +9,6 @@ export function Model(props) {
   const { nodes, materials } = useGLTF('/models/meBubble2.glb')
   
   // The Head bone and Eye meshes
-  // nodes.head (Bone)
   // nodes.EyeL, nodes.EyeR (Meshes)
 
   useFrame((state) => {
