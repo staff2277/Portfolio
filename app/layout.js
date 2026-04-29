@@ -1,26 +1,20 @@
-import { Space_Grotesk } from "next/font/google";
-import "./globals.css";
-import { SmoothScroll } from "@/components/SmoothScroll";
-import { TransitionLayout } from "@/components/TransitionLayout";
-import Navbar from "@/components/Navbar";
-
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "600", "700"] });
+import './globals.css';
 
 export const metadata = {
-  title: "Creative Portfolio",
-  description: "A highly animated creative developer portfolio",
+  title: 'Portfolio | Creative Developer',
+  description: 'A premium creative portfolio built with Next.js, Three.js, and GSAP.',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${spaceGrotesk.className} bg-black text-white antialiased`}>
-        <SmoothScroll>
-          <Navbar />
-          <TransitionLayout>
-            {children}
-          </TransitionLayout>
-        </SmoothScroll>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body>
+        {children}
       </body>
     </html>
   );
