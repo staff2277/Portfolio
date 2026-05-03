@@ -1,5 +1,5 @@
-import React, { useRef, useMemo } from 'react'
-import { useGLTF, MeshReflectorMaterial } from '@react-three/drei'
+import React, { useRef, useMemo, useEffect } from 'react'
+import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import * as THREE from 'three'
@@ -10,6 +10,18 @@ RectAreaLightUniformsLib.init()
 
 export function Model(props) {
   const { nodes, materials } = useGLTF('/models/showroom.glb')
+
+  // Track mouse position via direct DOM listener (bypasses OrbitControls event interception)
+  const mouseRef = useRef({ x: 0, y: 0 })
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      // Normalize to -1 to 1 range (same as R3F pointer)
+      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1
+      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    return () => window.removeEventListener('mousemove', onMouseMove)
+  }, [])
 
   // 1. Dynamic Lighting Controls
   const { 
@@ -37,70 +49,93 @@ export function Model(props) {
   })
 
   // 2. Head Tracking Setup
-  // In Rigify, only DEF- bones have vertex weights and deform the mesh.
-  // Control bones (head, neck) have NO weights — rotating them does nothing.
-  // We must find DEF-spine.006 (head) and DEF-spine.005 (neck) through
-  // the skinned mesh's skeleton.bones array.
-  
+  // With deform-only export, DEF- bones are the actual deforming bones.
+  // DEF-spine.006 = head, DEF-spine.005 = neck
+  // These are children within the DEF-spine hierarchy.
   const { headBone, neckBone } = useMemo(() => {
     const result = { headBone: null, neckBone: null }
     
-    // Access bones through the skinned mesh skeleton (the ONLY reliable source)
-    // nodes.input001_2 uses 'Head.001' material = the head mesh
-    const skeleton = nodes.input001?.skeleton || nodes.input001_2?.skeleton
+    // Log all available node names for debugging
+    const nodeNames = Object.keys(nodes)
+    console.log('[HeadTrack] All node names:', nodeNames)
     
-    if (skeleton) {
-      console.log('Skeleton bones:', skeleton.bones.map(b => b.name))
-      
-      for (const bone of skeleton.bones) {
-        if (bone.name === 'DEF-spine.006') result.headBone = bone
-        if (bone.name === 'DEF-spine.005') result.neckBone = bone
-        // Also check DEF-spine.004 as potential neck
-        if (!result.neckBone && bone.name === 'DEF-spine.004') result.neckBone = bone
-      }
-    } else {
-      console.warn('No skeleton found on skinned meshes!')
+    // Try direct node access first (deform-only export uses names without dots)
+    if (nodes['DEF-spine006']) {
+      result.headBone = nodes['DEF-spine006']
+      console.log('[HeadTrack] Found head via nodes["DEF-spine006"]')
+    }
+    if (nodes['DEF-spine005']) {
+      result.neckBone = nodes['DEF-spine005']
+      console.log('[HeadTrack] Found neck via nodes["DEF-spine005"]')
     }
     
-    console.log('Head bone:', result.headBone?.name || 'NONE', 'isBone:', result.headBone?.isBone)
-    console.log('Neck bone:', result.neckBone?.name || 'NONE', 'isBone:', result.neckBone?.isBone)
+    // Fallback: search through skeleton bones array
+    if (!result.headBone || !result.neckBone) {
+      const skeleton = nodes.input001?.skeleton || nodes.input001_2?.skeleton
+      if (skeleton) {
+        console.log('[HeadTrack] Skeleton bones:', skeleton.bones.map(b => b.name))
+        for (const bone of skeleton.bones) {
+          if (!result.headBone && bone.name === 'DEF-spine006') result.headBone = bone
+          if (!result.neckBone && bone.name === 'DEF-spine005') result.neckBone = bone
+        }
+      } else {
+        console.warn('[HeadTrack] No skeleton found on skinned meshes!')
+      }
+    }
+    
+    // Fallback 2: walk the DEF-spine bone tree manually
+    if (!result.headBone || !result.neckBone) {
+      const rootSpine = nodes['DEF-spine']
+      if (rootSpine) {
+        console.log('[HeadTrack] Walking DEF-spine tree...')
+        rootSpine.traverse((child) => {
+          console.log('[HeadTrack]   bone:', child.name, 'isBone:', child.isBone)
+          if (!result.headBone && child.name === 'DEF-spine006') result.headBone = child
+          if (!result.neckBone && child.name === 'DEF-spine005') result.neckBone = child
+        })
+      }
+    }
+    
+    console.log('[HeadTrack] Head bone:', result.headBone?.name || 'NONE', 'isBone:', result.headBone?.isBone)
+    console.log('[HeadTrack] Neck bone:', result.neckBone?.name || 'NONE', 'isBone:', result.neckBone?.isBone)
     
     // Store base rotations so we offset from the rest pose
     if (result.headBone) {
       result.headBone.userData.baseRotation = result.headBone.rotation.clone()
       const { x, y, z } = result.headBone.rotation
-      console.log('Head base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
+      console.log('[HeadTrack] Head base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
     }
     if (result.neckBone) {
       result.neckBone.userData.baseRotation = result.neckBone.rotation.clone()
       const { x, y, z } = result.neckBone.rotation
-      console.log('Neck base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
+      console.log('[HeadTrack] Neck base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
     }
     
     return result
   }, [nodes])
 
-  useFrame((state) => {
-    const mouse = state.pointer // -1 to 1 range
+  useFrame(() => {
+    const mouse = mouseRef.current // -1 to 1 range from DOM listener
     
     // Neck: subtle follow
     if (neckBone && neckBone.userData.baseRotation) {
       const base = neckBone.userData.baseRotation
-      const targetY = base.y + mouse.x * -0.25
-      const targetX = base.x + mouse.y * 0.15
-      neckBone.rotation.x = THREE.MathUtils.lerp(neckBone.rotation.x, targetX, 0.06)
-      neckBone.rotation.y = THREE.MathUtils.lerp(neckBone.rotation.y, targetY, 0.06)
+      const targetY = base.y + mouse.x * 0.25
+      const targetX = base.x + mouse.y * -0.15
+      neckBone.rotation.x = THREE.MathUtils.lerp(neckBone.rotation.x, targetX, 0.12)
+      neckBone.rotation.y = THREE.MathUtils.lerp(neckBone.rotation.y, targetY, 0.12)
     }
     
-    // Head: stronger follow
+    // Head: stronger follow, with extra upward tilt range
     if (headBone && headBone.userData.baseRotation) {
       const base = headBone.userData.baseRotation
-      const targetY = base.y + mouse.x * -0.5
-      const targetX = base.x + mouse.y * 0.35
-      headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetX, 0.08)
-      headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetY, 0.08)
+      const targetY = base.y + mouse.x * 0.5
+      const targetX = base.x + mouse.y * -0.55
+      headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetX, 0.15)
+      headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetY, 0.15)
     }
   })
+
   return (
     <group {...props} dispose={null}>
       <group name="Scene">
@@ -204,472 +239,18 @@ export function Model(props) {
               skeleton={nodes.input001_3.skeleton}
             />
           </group>
-          <primitive object={nodes.root} />
-          <primitive object={nodes['MCH-torsoparent']} />
-          <primitive object={nodes['MCH-hand_ikparentL']} />
-          <primitive object={nodes['MCH-upper_arm_ik_targetparentL']} />
-          <primitive object={nodes['MCH-hand_ikparentR']} />
-          <primitive object={nodes['MCH-upper_arm_ik_targetparentR']} />
-          <primitive object={nodes['MCH-foot_ikparentL']} />
-          <primitive object={nodes['MCH-thigh_ik_targetparentL']} />
-          <primitive object={nodes['MCH-foot_ikparentR']} />
-          <primitive object={nodes['MCH-thigh_ik_targetparentR']} />
+          <primitive object={nodes['DEF-spine']} />
+          <primitive object={nodes['DEF-pelvisL']} />
+          <primitive object={nodes['DEF-pelvisR']} />
+          <primitive object={nodes['DEF-thighL']} />
+          <primitive object={nodes['DEF-thighR']} />
+          <primitive object={nodes['DEF-shoulderL']} />
+          <primitive object={nodes['DEF-upper_armL']} />
+          <primitive object={nodes['DEF-shoulderR']} />
+          <primitive object={nodes['DEF-upper_armR']} />
+          <primitive object={nodes['DEF-breastL']} />
+          <primitive object={nodes['DEF-breastR']} />
         </group>
-        <group
-          name="WGT-rig_spine_fk"
-          position={[0, 0.578, -0.009]}
-          rotation={[1.823, 0, 0]}
-          scale={0.076}
-        />
-        <group
-          name="WGT-rig_spine_fk001"
-          position={[0, 0.642, -0.008]}
-          rotation={[1.582, 0, 0]}
-          scale={0.065}
-        />
-        <group
-          name="WGT-rig_spine_fk002"
-          position={[0, 0.642, -0.008]}
-          rotation={[1.551, 0, 0]}
-          scale={0.089}
-        />
-        <group
-          name="WGT-rig_spine_fk003"
-          position={[0, 0.731, -0.01]}
-          rotation={[1.522, -0.022, -0.003]}
-          scale={0.071}
-        />
-        <group
-          name="WGT-rig_tweak_spine"
-          position={[0, 0.504, -0.028]}
-          rotation={[1.823, 0, 0]}
-          scale={0.038}
-        />
-        <group
-          name="WGT-rig_tweak_spine001"
-          position={[0, 0.578, -0.009]}
-          rotation={[1.582, 0, 0]}
-          scale={0.032}
-        />
-        <group
-          name="WGT-rig_tweak_spine002"
-          position={[0, 0.642, -0.008]}
-          rotation={[1.551, 0, 0]}
-          scale={0.045}
-        />
-        <group
-          name="WGT-rig_tweak_spine003"
-          position={[0, 0.731, -0.01]}
-          rotation={[1.522, -0.022, -0.003]}
-          scale={0.035}
-        />
-        <group
-          name="WGT-rig_tweak_spine004"
-          position={[0.002, 0.802, -0.013]}
-          rotation={[1.572, 0.039, -0.031]}
-          scale={0.02}
-        />
-        <group name="WGT-rig_torso" position={[0, 0.541, -0.018]} scale={0.18} />
-        <group
-          name="WGT-rig_hips"
-          position={[0, 0.504, -0.028]}
-          rotation={[1.823, 0, 0]}
-          scale={0.075}
-        />
-        <group
-          name="WGT-rig_chest"
-          position={[0, 0.731, -0.01]}
-          rotation={[1.522, -0.022, -0.003]}
-          scale={0.1}
-        />
-        <group
-          name="WGT-rig_breastL"
-          position={[0.061, 0.77, -0.024]}
-          rotation={[Math.PI, 0, -3.138]}
-          scale={0.069}
-        />
-        <group
-          name="WGT-rig_breastR"
-          position={[-0.061, 0.77, -0.024]}
-          rotation={[0, 0, 3.138]}
-          scale={-0.069}
-        />
-        <group
-          name="WGT-rig_shoulderL"
-          position={[0.002, 0.802, -0.013]}
-          rotation={[-2.792, -1.542, -2.78]}
-          scale={0.106}
-        />
-        <group
-          name="WGT-rig_upper_arm_parentL"
-          position={[0.124, 0.791, -0.013]}
-          rotation={[-0.054, -1.332, -1.566]}
-          scale={0.033}
-        />
-        <group
-          name="WGT-rig_upper_arm_fkL"
-          position={[0.124, 0.791, -0.013]}
-          rotation={[-0.054, -1.332, -1.566]}
-          scale={0.131}
-        />
-        <group
-          name="WGT-rig_forearm_fkL"
-          position={[0.251, 0.789, -0.044]}
-          rotation={[3.077, -1.411, 1.564]}
-          scale={0.124}
-        />
-        <group
-          name="WGT-rig_hand_fkL"
-          position={[0.373, 0.79, -0.025]}
-          rotation={[-2.724, -1.501, 2.046]}
-          scale={0.063}
-        />
-        <group
-          name="WGT-rig_upper_arm_ikL"
-          position={[0.124, 0.791, -0.013]}
-          rotation={[-0.054, -1.332, -1.566]}
-          scale={0.131}
-        />
-        <group
-          name="WGT-rig_upper_arm_ik_targetL"
-          position={[0.239, 0.775, -0.293]}
-          rotation={[3.083, -0.045, 1.313]}
-          scale={0.031}
-        />
-        <group
-          name="WGT-rig_hand_ikL"
-          position={[0.373, 0.79, -0.025]}
-          rotation={[-2.724, -1.501, 2.046]}
-          scale={0.063}
-        />
-        <group
-          name="WGT-rig_VIS_upper_arm_ik_poleL"
-          position={[0.251, 0.789, -0.044]}
-          rotation={[Math.PI / 2, 0, -1.501]}
-          scale={0.249}
-        />
-        <group
-          name="WGT-rig_upper_arm_tweakL"
-          position={[0.124, 0.791, -0.013]}
-          rotation={[-0.054, -1.332, -1.566]}
-          scale={0.033}
-        />
-        <group
-          name="WGT-rig_upper_arm_tweakL001"
-          position={[0.187, 0.79, -0.029]}
-          rotation={[-0.054, -1.332, -1.566]}
-          scale={0.033}
-        />
-        <group
-          name="WGT-rig_forearm_tweakL"
-          position={[0.251, 0.789, -0.044]}
-          rotation={[3.077, -1.411, 1.564]}
-          scale={0.031}
-        />
-        <group
-          name="WGT-rig_forearm_tweakL001"
-          position={[0.312, 0.79, -0.034]}
-          rotation={[3.077, -1.411, 1.564]}
-          scale={0.031}
-        />
-        <group
-          name="WGT-rig_hand_tweakL"
-          position={[0.373, 0.79, -0.025]}
-          rotation={[-2.724, -1.501, 2.046]}
-          scale={0.016}
-        />
-        <group
-          name="WGT-rig_shoulderR"
-          position={[0.002, 0.802, -0.013]}
-          rotation={[0.35, -1.543, -2.78]}
-          scale={-0.109}
-        />
-        <group
-          name="WGT-rig_upper_arm_parentR"
-          position={[-0.124, 0.791, -0.013]}
-          rotation={[3.087, -1.332, -1.566]}
-          scale={-0.033}
-        />
-        <group
-          name="WGT-rig_upper_arm_fkR"
-          position={[-0.124, 0.791, -0.013]}
-          rotation={[3.087, -1.332, -1.566]}
-          scale={-0.131}
-        />
-        <group
-          name="WGT-rig_forearm_fkR"
-          position={[-0.251, 0.789, -0.044]}
-          rotation={[-0.065, -1.411, 1.564]}
-          scale={-0.124}
-        />
-        <group
-          name="WGT-rig_hand_fkR"
-          position={[-0.373, 0.79, -0.025]}
-          rotation={[0.418, -1.501, 2.046]}
-          scale={-0.063}
-        />
-        <group
-          name="WGT-rig_upper_arm_ikR"
-          position={[-0.124, 0.791, -0.013]}
-          rotation={[3.087, -1.332, -1.566]}
-          scale={-0.131}
-        />
-        <group
-          name="WGT-rig_upper_arm_ik_targetR"
-          position={[-0.239, 0.775, -0.293]}
-          rotation={[-0.059, -0.045, 1.313]}
-          scale={-0.031}
-        />
-        <group
-          name="WGT-rig_hand_ikR"
-          position={[-0.373, 0.79, -0.025]}
-          rotation={[0.418, -1.501, 2.046]}
-          scale={-0.063}
-        />
-        <group
-          name="WGT-rig_VIS_upper_arm_ik_poleR"
-          position={[-0.251, 0.789, -0.044]}
-          rotation={[-Math.PI / 2, 0, -1.501]}
-          scale={-0.249}
-        />
-        <group
-          name="WGT-rig_upper_arm_tweakR"
-          position={[-0.124, 0.791, -0.013]}
-          rotation={[3.087, -1.332, -1.566]}
-          scale={-0.033}
-        />
-        <group
-          name="WGT-rig_upper_arm_tweakR001"
-          position={[-0.187, 0.79, -0.029]}
-          rotation={[3.087, -1.332, -1.566]}
-          scale={-0.033}
-        />
-        <group
-          name="WGT-rig_forearm_tweakR"
-          position={[-0.251, 0.789, -0.044]}
-          rotation={[-0.065, -1.411, 1.564]}
-          scale={-0.031}
-        />
-        <group
-          name="WGT-rig_forearm_tweakR001"
-          position={[-0.312, 0.79, -0.034]}
-          rotation={[-0.065, -1.411, 1.564]}
-          scale={-0.031}
-        />
-        <group
-          name="WGT-rig_hand_tweakR"
-          position={[-0.373, 0.79, -0.025]}
-          rotation={[0.418, -1.501, 2.046]}
-          scale={-0.016}
-        />
-        <group
-          name="WGT-rig_neck"
-          position={[0.002, 0.802, -0.013]}
-          rotation={[1.594, 0.021, -0.014]}
-          scale={0.073}
-        />
-        <group
-          name="WGT-rig_head"
-          position={[0, 0.875, -0.011]}
-          rotation={[1.777, 0, 0]}
-          scale={0.116}
-        />
-        <group
-          name="WGT-rig_tweak_spine005"
-          position={[0, 0.842, -0.013]}
-          rotation={[1.622, 0, 0]}
-          scale={0.017}
-        />
-        <group
-          name="WGT-rig_thigh_parentL"
-          position={[0.078, 0.543, -0.006]}
-          rotation={[-1.536, -0.044, 1.406]}
-          scale={0.067}
-        />
-        <group
-          name="WGT-rig_thigh_fkL"
-          position={[0.078, 0.543, -0.006]}
-          rotation={[-1.536, -0.044, 1.406]}
-          scale={0.266}
-        />
-        <group
-          name="WGT-rig_shin_fkL"
-          position={[0.09, 0.277, -0.015]}
-          rotation={[-1.527, 0.009, 1.406]}
-          scale={0.225}
-        />
-        <group
-          name="WGT-rig_foot_fkL"
-          position={[0.088, 0.052, -0.025]}
-          rotation={[-2.639, 0, 0]}
-          scale={0.081}
-        />
-        <group
-          name="WGT-rig_toe_fkL"
-          position={[0.088, 0.013, 0.046]}
-          rotation={[-3.114, -0.192, 3.142]}
-          scale={0.035}
-        />
-        <group
-          name="WGT-rig_thigh_ikL"
-          position={[0.078, 0.543, -0.006]}
-          rotation={[-1.536, -0.044, 1.406]}
-          scale={0.266}
-        />
-        <group
-          name="WGT-rig_thigh_ik_targetL"
-          position={[0.574, 0.283, 0.065]}
-          rotation={[-0.077, 1.405, 0.065]}
-          scale={0.061}
-        />
-        <group name="WGT-rig_foot_ikL" position={[0.088, 0.052, -0.025]} scale={0.081} />
-        <group
-          name="WGT-rig_VIS_thigh_ik_poleL"
-          position={[0.09, 0.277, -0.015]}
-          rotation={[Math.PI / 2, 0, 1.397]}
-          scale={0.491}
-        />
-        <group
-          name="WGT-rig_thigh_tweakL"
-          position={[0.078, 0.543, -0.006]}
-          rotation={[-1.536, -0.044, 1.406]}
-          scale={0.067}
-        />
-        <group
-          name="WGT-rig_thigh_tweakL001"
-          position={[0.084, 0.41, -0.011]}
-          rotation={[-1.536, -0.044, 1.406]}
-          scale={0.067}
-        />
-        <group
-          name="WGT-rig_shin_tweakL"
-          position={[0.09, 0.277, -0.015]}
-          rotation={[-1.527, 0.009, 1.406]}
-          scale={0.056}
-        />
-        <group
-          name="WGT-rig_shin_tweakL001"
-          position={[0.089, 0.165, -0.02]}
-          rotation={[-1.527, 0.009, 1.406]}
-          scale={0.056}
-        />
-        <group
-          name="WGT-rig_foot_tweakL"
-          position={[0.088, 0.052, -0.025]}
-          rotation={[-2.639, 0, 0]}
-          scale={0.02}
-        />
-        <group name="WGT-rig_foot_spin_ikL" position={[0.088, 0.013, 0.046]} scale={0.04} />
-        <group name="WGT-rig_foot_heel_ikL" position={[0.088, 0.052, -0.025]} scale={0.04} />
-        <group
-          name="WGT-rig_toe_ikL"
-          position={[0.088, 0.013, 0.046]}
-          rotation={[-3.114, -0.192, 3.142]}
-          scale={0.035}
-        />
-        <group
-          name="WGT-rig_thigh_parentR"
-          position={[-0.078, 0.543, -0.006]}
-          rotation={[1.606, -0.044, 1.406]}
-          scale={-0.067}
-        />
-        <group
-          name="WGT-rig_thigh_fkR"
-          position={[-0.078, 0.543, -0.006]}
-          rotation={[1.606, -0.044, 1.406]}
-          scale={-0.266}
-        />
-        <group
-          name="WGT-rig_shin_fkR"
-          position={[-0.09, 0.277, -0.015]}
-          rotation={[1.614, 0.009, 1.406]}
-          scale={-0.225}
-        />
-        <group
-          name="WGT-rig_foot_fkR"
-          position={[-0.088, 0.052, -0.025]}
-          rotation={[0.502, 0, 0]}
-          scale={-0.081}
-        />
-        <group
-          name="WGT-rig_toe_fkR"
-          position={[-0.088, 0.013, 0.046]}
-          rotation={[0.028, -0.192, 3.142]}
-          scale={-0.035}
-        />
-        <group
-          name="WGT-rig_thigh_ikR"
-          position={[-0.078, 0.543, -0.006]}
-          rotation={[1.606, -0.044, 1.406]}
-          scale={-0.266}
-        />
-        <group
-          name="WGT-rig_thigh_ik_targetR"
-          position={[-0.574, 0.283, 0.065]}
-          rotation={[3.065, 1.405, 0.065]}
-          scale={-0.061}
-        />
-        <group
-          name="WGT-rig_foot_ikR"
-          position={[-0.088, 0.052, -0.025]}
-          rotation={[-Math.PI, 0, 0]}
-          scale={-0.081}
-        />
-        <group
-          name="WGT-rig_VIS_thigh_ik_poleR"
-          position={[-0.09, 0.277, -0.015]}
-          rotation={[-Math.PI / 2, 0, 1.397]}
-          scale={-0.491}
-        />
-        <group
-          name="WGT-rig_thigh_tweakR"
-          position={[-0.078, 0.543, -0.006]}
-          rotation={[1.606, -0.044, 1.406]}
-          scale={-0.067}
-        />
-        <group
-          name="WGT-rig_thigh_tweakR001"
-          position={[-0.084, 0.41, -0.011]}
-          rotation={[1.606, -0.044, 1.406]}
-          scale={-0.067}
-        />
-        <group
-          name="WGT-rig_shin_tweakR"
-          position={[-0.09, 0.277, -0.015]}
-          rotation={[1.614, 0.009, 1.406]}
-          scale={-0.056}
-        />
-        <group
-          name="WGT-rig_shin_tweakR001"
-          position={[-0.089, 0.165, -0.02]}
-          rotation={[1.614, 0.009, 1.406]}
-          scale={-0.056}
-        />
-        <group
-          name="WGT-rig_foot_tweakR"
-          position={[-0.088, 0.052, -0.025]}
-          rotation={[0.502, 0, 0]}
-          scale={-0.02}
-        />
-        <group
-          name="WGT-rig_foot_spin_ikR"
-          position={[-0.088, 0.013, 0.046]}
-          rotation={[-Math.PI, 0, 0]}
-          scale={-0.04}
-        />
-        <group
-          name="WGT-rig_foot_heel_ikR"
-          position={[-0.088, 0.052, -0.025]}
-          rotation={[-Math.PI, 0, 0]}
-          scale={-0.04}
-        />
-        <group
-          name="WGT-rig_toe_ikR"
-          position={[-0.088, 0.013, 0.046]}
-          rotation={[0.028, -0.192, 3.142]}
-          scale={-0.035}
-        />
-        <group name="WGT-rig_root" scale={0.497} />
       </group>
     </group>
   )
