@@ -21,37 +21,84 @@ export function Model(props) {
     windowLightColor,
     floorEmissiveColor,
     floorLightColor,
-    floorBaseColor
+    floorBaseColor,
+    wallColor
   } = useControls('Showroom Lighting', {
     windowEmissive: { value: 3.3, min: 0, max: 10, step: 0.1 },
     floorEmissive: { value: 1.1, min: 0, max: 10, step: 0.1 },
     windowLightIntensity: { value: 2, min: 0, max: 100, step: 1 },
     floorLightIntensity: { value: 0, min: 0, max: 100, step: 1 },
-    windowEmissiveColor: '#ffffff',
+    windowEmissiveColor: '#6bbbff',
     windowLightColor: '#79bff2',
-    floorEmissiveColor: '#ffffff',
+    floorEmissiveColor: '#b1d3eb',
     floorLightColor: '#656565',
     floorBaseColor: '#000000',
+    wallColor: '#95ceff',
   })
 
   // 2. Head Tracking Setup
-  // We target the head bone specifically for mouse tracking
-  const headBone = useMemo(() => {
-    return nodes['DEF-head'] || nodes['WGT-rig_head'] || nodes['head'] || null
+  // In Rigify, only DEF- bones have vertex weights and deform the mesh.
+  // Control bones (head, neck) have NO weights — rotating them does nothing.
+  // We must find DEF-spine.006 (head) and DEF-spine.005 (neck) through
+  // the skinned mesh's skeleton.bones array.
+  
+  const { headBone, neckBone } = useMemo(() => {
+    const result = { headBone: null, neckBone: null }
+    
+    // Access bones through the skinned mesh skeleton (the ONLY reliable source)
+    // nodes.input001_2 uses 'Head.001' material = the head mesh
+    const skeleton = nodes.input001?.skeleton || nodes.input001_2?.skeleton
+    
+    if (skeleton) {
+      console.log('Skeleton bones:', skeleton.bones.map(b => b.name))
+      
+      for (const bone of skeleton.bones) {
+        if (bone.name === 'DEF-spine.006') result.headBone = bone
+        if (bone.name === 'DEF-spine.005') result.neckBone = bone
+        // Also check DEF-spine.004 as potential neck
+        if (!result.neckBone && bone.name === 'DEF-spine.004') result.neckBone = bone
+      }
+    } else {
+      console.warn('No skeleton found on skinned meshes!')
+    }
+    
+    console.log('Head bone:', result.headBone?.name || 'NONE', 'isBone:', result.headBone?.isBone)
+    console.log('Neck bone:', result.neckBone?.name || 'NONE', 'isBone:', result.neckBone?.isBone)
+    
+    // Store base rotations so we offset from the rest pose
+    if (result.headBone) {
+      result.headBone.userData.baseRotation = result.headBone.rotation.clone()
+      const { x, y, z } = result.headBone.rotation
+      console.log('Head base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
+    }
+    if (result.neckBone) {
+      result.neckBone.userData.baseRotation = result.neckBone.rotation.clone()
+      const { x, y, z } = result.neckBone.rotation
+      console.log('Neck base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
+    }
+    
+    return result
   }, [nodes])
 
   useFrame((state) => {
-    if (headBone) {
-      const mouse = state.mouse
-      
-      // Target rotation (clamped for safety)
-      const targetRotationX = mouse.y * 0.4
-      const targetRotationY = mouse.x * 0.6
-      
-      // Smooth lerp to look at mouse
-      // Note: We add/subtract from base rotation if needed
-      headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetRotationX + 1.777, 0.1)
-      headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetRotationY, 0.1)
+    const mouse = state.pointer // -1 to 1 range
+    
+    // Neck: subtle follow
+    if (neckBone && neckBone.userData.baseRotation) {
+      const base = neckBone.userData.baseRotation
+      const targetY = base.y + mouse.x * -0.25
+      const targetX = base.x + mouse.y * 0.15
+      neckBone.rotation.x = THREE.MathUtils.lerp(neckBone.rotation.x, targetX, 0.06)
+      neckBone.rotation.y = THREE.MathUtils.lerp(neckBone.rotation.y, targetY, 0.06)
+    }
+    
+    // Head: stronger follow
+    if (headBone && headBone.userData.baseRotation) {
+      const base = headBone.userData.baseRotation
+      const targetY = base.y + mouse.x * -0.5
+      const targetX = base.x + mouse.y * 0.35
+      headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetX, 0.08)
+      headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetY, 0.08)
     }
   })
   return (
@@ -63,8 +110,9 @@ export function Model(props) {
             castShadow
             receiveShadow
             geometry={nodes.Circle_1.geometry}
-            material={materials.Walls}
-          />
+          >
+            <meshStandardMaterial color={wallColor} />
+          </mesh>
           <mesh
             name="Circle_2"
             castShadow

@@ -1,15 +1,20 @@
 "use client";
 
 import { Suspense, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { useControls } from "leva";
 import { Model } from "@/components/Model";
 
-function Scene() {
+function Scene({ camTarget, camRot, enableOrbit }) {
   return (
     <>
+      {enableOrbit ? (
+        <OrbitControls target={camTarget} makeDefault />
+      ) : (
+        <CameraHandler rotation={camRot} />
+      )}
       {/* <ambientLight intensity={0.2} /> */}
       <spotLight
         position={[0, 2, 5]}
@@ -39,18 +44,31 @@ function Scene() {
           />
         </EffectComposer>
       </Suspense>
-
     </>
   );
+}
+
+function CameraHandler({ rotation }) {
+  const { camera } = useThree();
+  useFrame(() => {
+    camera.rotation.set(rotation[0], rotation[1], rotation[2]);
+  });
+  return null;
 }
 
 export default function Home() {
   const containerRef = useRef(null);
 
-  const { camPos, fov } = useControls("Camera", {
-    camPos: { value: [0, 1, 5], step: 0.1 },
-    fov: { value: 45, min: 10, max: 120 },
-  });
+  const { camPos, camTarget, camRot, fov, enableOrbit } = useControls(
+    "Camera",
+    {
+      camPos: { value: [0, 1.5, 5], step: 0.1 },
+      camTarget: { value: [0, -11.4, -78.2], step: 0.1 },
+      camRot: { value: [0, 0, 0], step: 0.01 },
+      fov: { value: 45, min: 10, max: 120 },
+      enableOrbit: true,
+    },
+  );
 
   return (
     <main
@@ -64,7 +82,11 @@ export default function Home() {
           camera={{ position: camPos, fov: fov }}
           gl={{ antialias: true }}
         >
-          <Scene />
+          <Scene
+            camTarget={camTarget}
+            camRot={camRot}
+            enableOrbit={enableOrbit}
+          />
         </Canvas>
       </div>
 
