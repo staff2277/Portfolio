@@ -17,15 +17,21 @@ export function Model(props) {
     floorEmissive, 
     windowLightIntensity, 
     floorLightIntensity, 
-    windowColor, 
-    floorColor 
+    windowEmissiveColor,
+    windowLightColor,
+    floorEmissiveColor,
+    floorLightColor,
+    floorBaseColor
   } = useControls('Showroom Lighting', {
-    windowEmissive: { value: 2.0, min: 0, max: 10, step: 0.1 },
-    floorEmissive: { value: 1.5, min: 0, max: 10, step: 0.1 },
+    windowEmissive: { value: 3.3, min: 0, max: 10, step: 0.1 },
+    floorEmissive: { value: 1.1, min: 0, max: 10, step: 0.1 },
     windowLightIntensity: { value: 2, min: 0, max: 100, step: 1 },
     floorLightIntensity: { value: 0, min: 0, max: 100, step: 1 },
-    windowColor: '#ffffff',
-    floorColor: '#656565',
+    windowEmissiveColor: '#ffffff',
+    windowLightColor: '#79bff2',
+    floorEmissiveColor: '#ffffff',
+    floorLightColor: '#656565',
+    floorBaseColor: '#000000',
   })
 
   // 2. Head Tracking Setup
@@ -66,8 +72,8 @@ export function Model(props) {
             geometry={nodes.Circle_2.geometry}
           >
             <meshStandardMaterial 
-              color={windowColor}
-              emissive={windowColor}
+              color={windowEmissiveColor}
+              emissive={windowEmissiveColor}
               emissiveIntensity={windowEmissive}
               toneMapped={false}
             />
@@ -75,7 +81,7 @@ export function Model(props) {
             <rectAreaLight
               width={10}
               height={5}
-              color={windowColor}
+              color={windowLightColor}
               intensity={windowLightIntensity}
               position={[0, 2, -5]}
               rotation={[0, Math.PI, 0]}
@@ -86,8 +92,13 @@ export function Model(props) {
             castShadow
             receiveShadow
             geometry={nodes.Circle_3.geometry}
-            material={materials['Floor ']}
-          />
+          >
+            <meshStandardMaterial 
+              color={floorBaseColor}
+              roughness={0.1}
+              metalness={0.5}
+            />
+          </mesh>
           <mesh
             name="Circle_4"
             castShadow
@@ -95,8 +106,8 @@ export function Model(props) {
             geometry={nodes.Circle_4.geometry}
           >
             <meshStandardMaterial 
-              color={floorColor}
-              emissive={floorColor}
+              color={floorEmissiveColor}
+              emissive={floorEmissiveColor}
               emissiveIntensity={floorEmissive}
               toneMapped={false}
             />
@@ -104,7 +115,7 @@ export function Model(props) {
             <rectAreaLight
               width={5}
               height={5}
-              color={floorColor}
+              color={floorLightColor}
               intensity={floorLightIntensity}
               position={[0, 0.1, 0]}
               rotation={[-Math.PI / 2, 0, 0]}

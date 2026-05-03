@@ -4,21 +4,20 @@ import { Suspense, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { useControls } from "leva";
 import { Model } from "@/components/Model";
 
 function Scene() {
   return (
     <>
-      {/* <ambientLight intensity={0.5} /> */}
-      {/* 
+      {/* <ambientLight intensity={0.2} /> */}
       <spotLight
-        position={[10, 10, 10]}
-        angle={0.15}
+        position={[0, 2, 5]}
+        angle={0.3}
         penumbra={1}
-        intensity={1}
+        intensity={80}
         castShadow
       />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} /> */}
 
       <Suspense fallback={null}>
         <Model position={[0, -0.5, 0]} scale={2} />
@@ -41,19 +40,17 @@ function Scene() {
         </EffectComposer>
       </Suspense>
 
-      <OrbitControls
-        enablePan={false}
-        enableZoom={true}
-        minPolarAngle={Math.PI / 4}
-        maxPolarAngle={Math.PI / 2}
-        makeDefault
-      />
     </>
   );
 }
 
 export default function Home() {
   const containerRef = useRef(null);
+
+  const { camPos, fov } = useControls("Camera", {
+    camPos: { value: [0, 1, 5], step: 0.1 },
+    fov: { value: 45, min: 10, max: 120 },
+  });
 
   return (
     <main
@@ -64,7 +61,7 @@ export default function Home() {
       <div className="absolute inset-0 z-0">
         <Canvas
           shadows
-          camera={{ position: [0, 1, 5], fov: 45 }}
+          camera={{ position: camPos, fov: fov }}
           gl={{ antialias: true }}
         >
           <Scene />
