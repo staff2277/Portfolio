@@ -48,91 +48,122 @@ export function Model(props) {
     wallColor: '#95ceff',
   })
 
+  const { 
+    headIntensity, 
+    bodyIntensity, 
+    shoulderIntensity,
+    lerpSpeed
+  } = useControls('Robot Movement', {
+    headIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
+    bodyIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
+    shoulderIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
+    lerpSpeed: { value: 0.08, min: 0.01, max: 0.3, step: 0.01 },
+  })
+
   // 2. Head Tracking Setup
   // With deform-only export, DEF- bones are the actual deforming bones.
   // DEF-spine.006 = head, DEF-spine.005 = neck
   // These are children within the DEF-spine hierarchy.
-  const { headBone, neckBone } = useMemo(() => {
-    const result = { headBone: null, neckBone: null }
-    
-    // Log all available node names for debugging
-    const nodeNames = Object.keys(nodes)
-    console.log('[HeadTrack] All node names:', nodeNames)
-    
-    // Try direct node access first (deform-only export uses names without dots)
-    if (nodes['DEF-spine006']) {
-      result.headBone = nodes['DEF-spine006']
-      console.log('[HeadTrack] Found head via nodes["DEF-spine006"]')
-    }
-    if (nodes['DEF-spine005']) {
-      result.neckBone = nodes['DEF-spine005']
-      console.log('[HeadTrack] Found neck via nodes["DEF-spine005"]')
+  const { headBone, neckBone, chestBone, spineBone, shoulderL, shoulderR, armL, armR } = useMemo(() => {
+    const result = { 
+      headBone: null, 
+      neckBone: null, 
+      chestBone: null, 
+      spineBone: null, 
+      shoulderL: null, 
+      shoulderR: null,
+      armL: null,
+      armR: null
     }
     
-    // Fallback: search through skeleton bones array
-    if (!result.headBone || !result.neckBone) {
-      const skeleton = nodes.input001?.skeleton || nodes.input001_2?.skeleton
-      if (skeleton) {
-        console.log('[HeadTrack] Skeleton bones:', skeleton.bones.map(b => b.name))
-        for (const bone of skeleton.bones) {
-          if (!result.headBone && bone.name === 'DEF-spine006') result.headBone = bone
-          if (!result.neckBone && bone.name === 'DEF-spine005') result.neckBone = bone
-        }
-      } else {
-        console.warn('[HeadTrack] No skeleton found on skinned meshes!')
-      }
+    // Helper to find bone in nodes or hierarchy
+    const findBone = (name) => {
+      if (nodes[name]) return nodes[name]
+      let found = null
+      nodes['DEF-spine']?.traverse((child) => {
+        if (child.name === name) found = child
+      })
+      return found
     }
+
+    result.headBone = findBone('DEF-spine006')
+    result.neckBone = findBone('DEF-spine005')
+    result.chestBone = findBone('DEF-spine003')
+    result.spineBone = findBone('DEF-spine001')
+    result.shoulderL = findBone('DEF-shoulderL')
+    result.shoulderR = findBone('DEF-shoulderR')
+    result.armL = findBone('DEF-upper_armL')
+    result.armR = findBone('DEF-upper_armR')
     
-    // Fallback 2: walk the DEF-spine bone tree manually
-    if (!result.headBone || !result.neckBone) {
-      const rootSpine = nodes['DEF-spine']
-      if (rootSpine) {
-        console.log('[HeadTrack] Walking DEF-spine tree...')
-        rootSpine.traverse((child) => {
-          console.log('[HeadTrack]   bone:', child.name, 'isBone:', child.isBone)
-          if (!result.headBone && child.name === 'DEF-spine006') result.headBone = child
-          if (!result.neckBone && child.name === 'DEF-spine005') result.neckBone = child
-        })
-      }
-    }
+    const allFound = Object.entries(result).map(([k, v]) => `${k}: ${!!v}`)
+    console.log('[HeadTrack] Bones mapping:', allFound)
     
-    console.log('[HeadTrack] Head bone:', result.headBone?.name || 'NONE', 'isBone:', result.headBone?.isBone)
-    console.log('[HeadTrack] Neck bone:', result.neckBone?.name || 'NONE', 'isBone:', result.neckBone?.isBone)
-    
-    // Store base rotations so we offset from the rest pose
-    if (result.headBone) {
-      result.headBone.userData.baseRotation = result.headBone.rotation.clone()
-      const { x, y, z } = result.headBone.rotation
-      console.log('[HeadTrack] Head base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
-    }
-    if (result.neckBone) {
-      result.neckBone.userData.baseRotation = result.neckBone.rotation.clone()
-      const { x, y, z } = result.neckBone.rotation
-      console.log('[HeadTrack] Neck base rot:', x.toFixed(3), y.toFixed(3), z.toFixed(3))
-    }
+    // Store base rotations
+    Object.values(result).forEach(bone => {
+      if (bone) bone.userData.baseRotation = bone.rotation.clone()
+    })
     
     return result
   }, [nodes])
 
+  // Set a more natural "Relaxed" pose on mount (Arms down, slight slouch)
+  useEffect(() => {
+    if (armL) armL.rotation.z = -Math.PI / 2.5
+    if (armR) armR.rotation.z = Math.PI / 2.5
+    if (shoulderL) shoulderL.rotation.z = -0.1
+    if (shoulderR) shoulderR.rotation.z = 0.1
+    if (spineBone) spineBone.rotation.x = 0.05
+    
+    // Update base rotations to include this natural pose
+    const bones = [armL, armR, shoulderL, shoulderR, spineBone]
+    bones.forEach(b => {
+      if (b) b.userData.baseRotation = b.rotation.clone()
+    })
+  }, [armL, armR, shoulderL, shoulderR, spineBone])
+
   useFrame(() => {
     const mouse = mouseRef.current // -1 to 1 range from DOM listener
     
-    // Neck: subtle follow
+    // 1. Spine & Chest: subtle lean
+    if (spineBone && spineBone.userData.baseRotation) {
+      const base = spineBone.userData.baseRotation
+      spineBone.rotation.y = THREE.MathUtils.lerp(spineBone.rotation.y, base.y + mouse.x * 0.1 * bodyIntensity, lerpSpeed)
+      spineBone.rotation.x = THREE.MathUtils.lerp(spineBone.rotation.x, base.x + mouse.y * -0.05 * bodyIntensity, lerpSpeed)
+    }
+    if (chestBone && chestBone.userData.baseRotation) {
+      const base = chestBone.userData.baseRotation
+      chestBone.rotation.y = THREE.MathUtils.lerp(chestBone.rotation.y, base.y + mouse.x * 0.15 * bodyIntensity, lerpSpeed)
+      chestBone.rotation.x = THREE.MathUtils.lerp(chestBone.rotation.x, base.x + mouse.y * -0.1 * bodyIntensity, lerpSpeed)
+    }
+
+    // 2. Shoulders: reactive shrug
+    if (shoulderL && shoulderL.userData.baseRotation) {
+      const base = shoulderL.userData.baseRotation
+      shoulderL.rotation.x = THREE.MathUtils.lerp(shoulderL.rotation.x, base.x + mouse.y * 0.1 * shoulderIntensity, lerpSpeed)
+      shoulderL.rotation.z = THREE.MathUtils.lerp(shoulderL.rotation.z, base.z + mouse.y * 0.05 * shoulderIntensity, lerpSpeed)
+    }
+    if (shoulderR && shoulderR.userData.baseRotation) {
+      const base = shoulderR.userData.baseRotation
+      shoulderR.rotation.x = THREE.MathUtils.lerp(shoulderR.rotation.x, base.x + mouse.y * 0.1 * shoulderIntensity, lerpSpeed)
+      shoulderR.rotation.z = THREE.MathUtils.lerp(shoulderR.rotation.z, base.z + mouse.y * -0.05 * shoulderIntensity, lerpSpeed)
+    }
+
+    // 3. Neck: subtle follow
     if (neckBone && neckBone.userData.baseRotation) {
       const base = neckBone.userData.baseRotation
-      const targetY = base.y + mouse.x * 0.25
-      const targetX = base.x + mouse.y * -0.15
-      neckBone.rotation.x = THREE.MathUtils.lerp(neckBone.rotation.x, targetX, 0.12)
-      neckBone.rotation.y = THREE.MathUtils.lerp(neckBone.rotation.y, targetY, 0.12)
+      const targetY = base.y + mouse.x * 0.25 * headIntensity
+      const targetX = base.x + mouse.y * -0.15 * headIntensity
+      neckBone.rotation.x = THREE.MathUtils.lerp(neckBone.rotation.x, targetX, lerpSpeed * 1.5)
+      neckBone.rotation.y = THREE.MathUtils.lerp(neckBone.rotation.y, targetY, lerpSpeed * 1.5)
     }
     
-    // Head: stronger follow, with extra upward tilt range
+    // 4. Head: stronger follow, with extra upward tilt range
     if (headBone && headBone.userData.baseRotation) {
       const base = headBone.userData.baseRotation
-      const targetY = base.y + mouse.x * 0.5
-      const targetX = base.x + mouse.y * -0.55
-      headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetX, 0.15)
-      headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetY, 0.15)
+      const targetY = base.y + mouse.x * 0.5 * headIntensity
+      const targetX = base.x + mouse.y * -0.55 * headIntensity
+      headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetX, lerpSpeed * 2)
+      headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetY, lerpSpeed * 2)
     }
   })
 
