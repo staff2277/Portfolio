@@ -1,8 +1,40 @@
 'use client';
 
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
+import { Model } from '@/components/Model';
+
+function Scene() {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} />
+      
+      <Suspense fallback={null}>
+        <Model position={[0, -0.5, 0]} scale={2} />
+        <Environment preset="city" />
+        <ContactShadows 
+          position={[0, -0.5, 0]} 
+          opacity={0.4} 
+          scale={10} 
+          blur={2} 
+          far={4.5} 
+        />
+      </Suspense>
+
+      <OrbitControls 
+        enablePan={false}
+        enableZoom={true}
+        minPolarAngle={Math.PI / 4}
+        maxPolarAngle={Math.PI / 2}
+        makeDefault
+      />
+    </>
+  );
+}
+
 export default function Home() {
   const containerRef = useRef(null);
 
@@ -47,4 +79,3 @@ export default function Home() {
     </main>
   );
 }
-
