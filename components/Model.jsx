@@ -57,6 +57,7 @@ export function Model(props) {
     headIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
     bodyIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
     shoulderIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
+    handIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
     lerpSpeed: { value: 0.08, min: 0.01, max: 0.3, step: 0.01 },
   })
 
@@ -73,7 +74,9 @@ export function Model(props) {
       shoulderL: null, 
       shoulderR: null,
       armL: null,
-      armR: null
+      armR: null,
+      handL: null,
+      handR: null
     }
     
     // Helper to find bone in nodes or hierarchy
@@ -94,6 +97,8 @@ export function Model(props) {
     result.shoulderR = findBone('DEF-shoulderR')
     result.armL = findBone('DEF-upper_armL')
     result.armR = findBone('DEF-upper_armR')
+    result.handL = findBone('DEF-handL')
+    result.handR = findBone('DEF-handR')
     
     const allFound = Object.entries(result).map(([k, v]) => `${k}: ${!!v}`)
     console.log('[HeadTrack] Bones mapping:', allFound)
@@ -115,11 +120,11 @@ export function Model(props) {
     if (spineBone) spineBone.rotation.x = 0.05
     
     // Update base rotations to include this natural pose
-    const bones = [armL, armR, shoulderL, shoulderR, spineBone]
+    const bones = [armL, armR, shoulderL, shoulderR, spineBone, handL, handR]
     bones.forEach(b => {
       if (b) b.userData.baseRotation = b.rotation.clone()
     })
-  }, [armL, armR, shoulderL, shoulderR, spineBone])
+  }, [armL, armR, shoulderL, shoulderR, spineBone, handL, handR])
 
   useFrame(() => {
     const mouse = mouseRef.current // -1 to 1 range from DOM listener
@@ -164,6 +169,33 @@ export function Model(props) {
       const targetX = base.x + mouse.y * -0.55 * headIntensity
       headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetX, lerpSpeed * 2)
       headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetY, lerpSpeed * 2)
+    }
+
+    // 5. Hands: reactive sway & subtle follow
+    const time = Date.now() * 0.001
+    if (handL && handL.userData.baseRotation) {
+      const base = handL.userData.baseRotation
+      // Idle sway
+      const swayX = Math.sin(time * 1.5) * 0.05
+      const swayZ = Math.cos(time * 1.5) * 0.05
+      // Mouse reaction
+      const mouseX = mouse.x * 0.2 * handIntensity
+      const mouseY = mouse.y * 0.2 * handIntensity
+      
+      handL.rotation.x = THREE.MathUtils.lerp(handL.rotation.x, base.x + swayX + mouseY, lerpSpeed)
+      handL.rotation.z = THREE.MathUtils.lerp(handL.rotation.z, base.z + swayZ + mouseX, lerpSpeed)
+    }
+    if (handR && handR.userData.baseRotation) {
+      const base = handR.userData.baseRotation
+      // Idle sway (offset from left)
+      const swayX = Math.sin(time * 1.5 + Math.PI) * 0.05
+      const swayZ = Math.cos(time * 1.5 + Math.PI) * 0.05
+      // Mouse reaction
+      const mouseX = mouse.x * 0.2 * handIntensity
+      const mouseY = mouse.y * 0.2 * handIntensity
+      
+      handR.rotation.x = THREE.MathUtils.lerp(handR.rotation.x, base.x + swayX + mouseY, lerpSpeed)
+      handR.rotation.z = THREE.MathUtils.lerp(handR.rotation.z, base.z + swayZ + mouseX, lerpSpeed)
     }
   })
 

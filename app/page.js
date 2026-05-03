@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef } from "react";
+import { Suspense, useRef, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
@@ -26,7 +26,7 @@ function Scene({ camTarget, camRot, enableOrbit }) {
 
       <Suspense fallback={null}>
         <Model position={[0, -0.5, 0]} scale={2} />
-        {<Environment preset="night" />}
+        {<Environment preset="night" resolution={256} />}
         <ContactShadows
           position={[0, -0.49, 0]}
           opacity={0.4}
@@ -35,12 +35,12 @@ function Scene({ camTarget, camRot, enableOrbit }) {
           far={4.5}
         />
 
-        <EffectComposer disableNormalPass>
+        <EffectComposer disableNormalPass multisampling={0}>
           <Bloom
             luminanceThreshold={0.2}
-            mipmapBlur
             intensity={1.2}
             radius={0.4}
+            mipmapBlur={false}
           />
         </EffectComposer>
       </Suspense>
@@ -58,6 +58,11 @@ function CameraHandler({ rotation }) {
 
 export default function Home() {
   const containerRef = useRef(null);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { camPos, camTarget, camRot, fov, enableOrbit } = useControls(
     "Camera",
@@ -77,17 +82,23 @@ export default function Home() {
     >
       {/* 3D Background */}
       <div className="absolute inset-0 z-0">
-        <Canvas
-          shadows
-          camera={{ position: camPos, fov: fov }}
-          gl={{ antialias: true }}
-        >
-          <Scene
-            camTarget={camTarget}
-            camRot={camRot}
-            enableOrbit={enableOrbit}
-          />
-        </Canvas>
+        {mounted && (
+          <Canvas
+            shadows
+            dpr={[1, 2]}
+            camera={{ position: camPos, fov: fov }}
+            gl={{ 
+              antialias: false, 
+              powerPreference: "high-performance"
+            }}
+          >
+            <Scene
+              camTarget={camTarget}
+              camRot={camRot}
+              enableOrbit={enableOrbit}
+            />
+          </Canvas>
+        )}
       </div>
 
       {/* UI Overlay */}
