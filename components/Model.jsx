@@ -1,8 +1,53 @@
-import React, { useRef } from 'react'
-import { useGLTF } from '@react-three/drei'
+import React, { useRef, useMemo } from 'react'
+import { useGLTF, MeshReflectorMaterial } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useControls } from 'leva'
+import * as THREE from 'three'
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib'
+
+// Initialize RectAreaLight to enable reflections in PBR materials
+RectAreaLightUniformsLib.init()
 
 export function Model(props) {
   const { nodes, materials } = useGLTF('/models/showroom.glb')
+
+  // 1. Dynamic Lighting Controls
+  const { 
+    windowEmissive, 
+    floorEmissive, 
+    windowLightIntensity, 
+    floorLightIntensity, 
+    windowColor, 
+    floorColor 
+  } = useControls('Showroom Lighting', {
+    windowEmissive: { value: 2.0, min: 0, max: 10, step: 0.1 },
+    floorEmissive: { value: 1.5, min: 0, max: 10, step: 0.1 },
+    windowLightIntensity: { value: 2, min: 0, max: 100, step: 1 },
+    floorLightIntensity: { value: 0, min: 0, max: 100, step: 1 },
+    windowColor: '#ffffff',
+    floorColor: '#656565',
+  })
+
+  // 2. Head Tracking Setup
+  // We target the head bone specifically for mouse tracking
+  const headBone = useMemo(() => {
+    return nodes['DEF-head'] || nodes['WGT-rig_head'] || nodes['head'] || null
+  }, [nodes])
+
+  useFrame((state) => {
+    if (headBone) {
+      const mouse = state.mouse
+      
+      // Target rotation (clamped for safety)
+      const targetRotationX = mouse.y * 0.4
+      const targetRotationY = mouse.x * 0.6
+      
+      // Smooth lerp to look at mouse
+      // Note: We add/subtract from base rotation if needed
+      headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetRotationX + 1.777, 0.1)
+      headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetRotationY, 0.1)
+    }
+  })
   return (
     <group {...props} dispose={null}>
       <group name="Scene">
@@ -19,8 +64,23 @@ export function Model(props) {
             castShadow
             receiveShadow
             geometry={nodes.Circle_2.geometry}
-            material={materials.Windows}
-          />
+          >
+            <meshStandardMaterial 
+              color={windowColor}
+              emissive={windowColor}
+              emissiveIntensity={windowEmissive}
+              toneMapped={false}
+            />
+            {/* RectAreaLight provides both diffuse illumination and physical reflections on the robot */}
+            <rectAreaLight
+              width={10}
+              height={5}
+              color={windowColor}
+              intensity={windowLightIntensity}
+              position={[0, 2, -5]}
+              rotation={[0, Math.PI, 0]}
+            />
+          </mesh>
           <mesh
             name="Circle_3"
             castShadow
@@ -33,8 +93,23 @@ export function Model(props) {
             castShadow
             receiveShadow
             geometry={nodes.Circle_4.geometry}
-            material={materials['Floor Lights']}
-          />
+          >
+            <meshStandardMaterial 
+              color={floorColor}
+              emissive={floorColor}
+              emissiveIntensity={floorEmissive}
+              toneMapped={false}
+            />
+            {/* Added for floor light illumination and reflection */}
+            <rectAreaLight
+              width={5}
+              height={5}
+              color={floorColor}
+              intensity={floorLightIntensity}
+              position={[0, 0.1, 0]}
+              rotation={[-Math.PI / 2, 0, 0]}
+            />
+          </mesh>
           <mesh
             name="Circle_5"
             castShadow

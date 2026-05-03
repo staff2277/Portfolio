@@ -1,30 +1,47 @@
-'use client';
+"use client";
 
-import { Suspense, useRef } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
-import { Model } from '@/components/Model';
+import { Suspense, useRef } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { Model } from "@/components/Model";
 
 function Scene() {
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} />
-      
+      {/* <ambientLight intensity={0.5} /> */}
+      {/* 
+      <spotLight
+        position={[10, 10, 10]}
+        angle={0.15}
+        penumbra={1}
+        intensity={1}
+        castShadow
+      />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} /> */}
+
       <Suspense fallback={null}>
         <Model position={[0, -0.5, 0]} scale={2} />
-        <Environment preset="city" />
-        <ContactShadows 
-          position={[0, -0.5, 0]} 
-          opacity={0.4} 
-          scale={10} 
-          blur={2} 
-          far={4.5} 
+        {<Environment preset="night" />}
+        <ContactShadows
+          position={[0, -0.49, 0]}
+          opacity={0.4}
+          scale={10}
+          blur={2}
+          far={4.5}
         />
+
+        <EffectComposer disableNormalPass>
+          <Bloom
+            luminanceThreshold={0.2}
+            mipmapBlur
+            intensity={1.2}
+            radius={0.4}
+          />
+        </EffectComposer>
       </Suspense>
 
-      <OrbitControls 
+      <OrbitControls
         enablePan={false}
         enableZoom={true}
         minPolarAngle={Math.PI / 4}
@@ -39,7 +56,7 @@ export default function Home() {
   const containerRef = useRef(null);
 
   return (
-    <main 
+    <main
       ref={containerRef}
       className="relative w-full h-screen bg-[#050505] overflow-hidden"
     >
