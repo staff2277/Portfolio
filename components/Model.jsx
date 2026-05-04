@@ -106,6 +106,20 @@ export function Model(props) {
     const allFound = Object.entries(result).map(([k, v]) => `${k}: ${!!v}`)
     console.log('[HeadTrack] Bones mapping:', allFound)
     
+    // Set a more natural "Relaxed" pose immediately (Arms down, slight slouch)
+    // Bring arms down closer to the sides (closer to -90 / +90 degrees)
+    if (result.armL) {
+      result.armL.rotation.z = -Math.PI / 2.2
+      result.armL.rotation.x = 0.1
+    }
+    if (result.armR) {
+      result.armR.rotation.z = Math.PI / 2.2
+      result.armR.rotation.x = 0.1
+    }
+    if (result.shoulderL) result.shoulderL.rotation.z = -0.1
+    if (result.shoulderR) result.shoulderR.rotation.z = 0.1
+    if (result.spineBone) result.spineBone.rotation.x = 0.05
+    
     // Store base rotations
     Object.values(result).forEach(bone => {
       if (bone) bone.userData.baseRotation = bone.rotation.clone()
@@ -113,21 +127,6 @@ export function Model(props) {
     
     return result
   }, [nodes])
-
-  // Set a more natural "Relaxed" pose on mount (Arms down, slight slouch)
-  useEffect(() => {
-    if (armL) armL.rotation.z = -Math.PI / 2.5
-    if (armR) armR.rotation.z = Math.PI / 2.5
-    if (shoulderL) shoulderL.rotation.z = -0.1
-    if (shoulderR) shoulderR.rotation.z = 0.1
-    if (spineBone) spineBone.rotation.x = 0.05
-    
-    // Update base rotations to include this natural pose
-    const bones = [armL, armR, shoulderL, shoulderR, spineBone, handL, handR]
-    bones.forEach(b => {
-      if (b) b.userData.baseRotation = b.rotation.clone()
-    })
-  }, [armL, armR, shoulderL, shoulderR, spineBone, handL, handR])
 
   useFrame(() => {
     const mouse = mouseRef.current // -1 to 1 range from DOM listener
