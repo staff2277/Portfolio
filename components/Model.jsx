@@ -52,12 +52,15 @@ export function Model(props) {
     headIntensity, 
     bodyIntensity, 
     shoulderIntensity,
+    handIntensity,
+    armIntensity,
     lerpSpeed
   } = useControls('Robot Movement', {
     headIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
     bodyIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
     shoulderIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
     handIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
+    armIntensity: { value: 1.0, min: 0, max: 2, step: 0.1 },
     lerpSpeed: { value: 0.08, min: 0.01, max: 0.3, step: 0.01 },
   })
 
@@ -65,7 +68,7 @@ export function Model(props) {
   // With deform-only export, DEF- bones are the actual deforming bones.
   // DEF-spine.006 = head, DEF-spine.005 = neck
   // These are children within the DEF-spine hierarchy.
-  const { headBone, neckBone, chestBone, spineBone, shoulderL, shoulderR, armL, armR } = useMemo(() => {
+  const { headBone, neckBone, chestBone, spineBone, shoulderL, shoulderR, armL, armR, handL, handR } = useMemo(() => {
     const result = { 
       headBone: null, 
       neckBone: null, 
@@ -169,6 +172,23 @@ export function Model(props) {
       const targetX = base.x + mouse.y * -0.55 * headIntensity
       headBone.rotation.x = THREE.MathUtils.lerp(headBone.rotation.x, targetX, lerpSpeed * 2)
       headBone.rotation.y = THREE.MathUtils.lerp(headBone.rotation.y, targetY, lerpSpeed * 2)
+    }
+
+    // Arms: dynamic movement away from base pose
+    if (armL && armL.userData.baseRotation) {
+      const base = armL.userData.baseRotation
+      const targetZ = base.z + mouse.x * 0.3 * armIntensity
+      const targetX = base.x + mouse.y * -0.3 * armIntensity
+      armL.rotation.z = THREE.MathUtils.lerp(armL.rotation.z, targetZ, lerpSpeed)
+      armL.rotation.x = THREE.MathUtils.lerp(armL.rotation.x, targetX, lerpSpeed)
+    }
+    if (armR && armR.userData.baseRotation) {
+      const base = armR.userData.baseRotation
+      // Invert Z for right arm so they move in harmony with mouse
+      const targetZ = base.z + mouse.x * 0.3 * armIntensity
+      const targetX = base.x + mouse.y * -0.3 * armIntensity
+      armR.rotation.z = THREE.MathUtils.lerp(armR.rotation.z, targetZ, lerpSpeed)
+      armR.rotation.x = THREE.MathUtils.lerp(armR.rotation.x, targetX, lerpSpeed)
     }
 
     // 5. Hands: reactive sway & subtle follow
