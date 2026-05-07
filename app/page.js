@@ -26,7 +26,7 @@ function Scene({ camTarget, camRot, enableOrbit }) {
 
       <Suspense fallback={null}>
         <Model position={[0, -0.5, 0]} scale={2} />
-        {<Environment preset="night" resolution={256} />}
+        {<Environment preset="sunset" resolution={256} />}
         <ContactShadows
           position={[0, -0.49, 0]}
           opacity={0.4}
@@ -87,9 +87,9 @@ export default function Home() {
             shadows
             dpr={[1, 2]}
             camera={{ position: camPos, fov: fov }}
-            gl={{ 
-              antialias: false, 
-              powerPreference: "high-performance"
+            gl={{
+              antialias: false,
+              powerPreference: "high-performance",
             }}
           >
             <Scene
