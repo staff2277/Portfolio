@@ -1,4 +1,6 @@
 import './globals.css';
+import Navbar from '../components/Navbar';
+import PageTransitionProvider from '../components/PageTransitionProvider';
 
 export const metadata = {
   title: 'Portfolio | Creative Developer',
@@ -13,8 +15,11 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body>
-        {children}
+      <body className="bg-black text-white antialiased">
+        <Navbar />
+        <PageTransitionProvider>
+          {children}
+        </PageTransitionProvider>
       </body>
     </html>
   );
