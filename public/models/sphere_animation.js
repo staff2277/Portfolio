@@ -77,8 +77,8 @@ wireframeMaterial.positionNode = positionOffset;
 wireframeMaterial.opacityNode = wireframeMix;
 
 // Create meshes
-let mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+let sphereShell = new THREE.Mesh(geometry, material);
+scene.add(sphereShell);
 
 let wireframeMesh = new THREE.Mesh(geometry, wireframeMaterial);
 scene.add(wireframeMesh);

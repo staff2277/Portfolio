@@ -1,6 +1,7 @@
 import './globals.css';
 import Navbar from '../components/Navbar';
 import PageTransitionProvider from '../components/PageTransitionProvider';
+import SmoothScroll from '../components/SmoothScroll';
 
 export const metadata = {
   title: 'Portfolio | Creative Developer',
@@ -15,11 +16,18 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-black text-white antialiased">
-        <Navbar />
-        <PageTransitionProvider>
-          {children}
-        </PageTransitionProvider>
+      {/* suppressHydrationWarning here only ignores mismatches on this exact
+          element (e.g. data-gr-ext-installed / data-new-gr-c-s-check-loaded,
+          which browser extensions like Grammarly inject into <body> before
+          React hydrates) -- it does not suppress hydration warnings anywhere
+          else in the tree. */}
+      <body className="bg-black text-white antialiased" suppressHydrationWarning>
+        <SmoothScroll>
+          <Navbar />
+          <PageTransitionProvider>
+            {children}
+          </PageTransitionProvider>
+        </SmoothScroll>
       </body>
     </html>
   );
