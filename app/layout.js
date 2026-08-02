@@ -1,6 +1,5 @@
 import './globals.css';
 import Navbar from '../components/Navbar';
-import PageTransitionProvider from '../components/PageTransitionProvider';
 import SmoothScroll from '../components/SmoothScroll';
 
 export const metadata = {
@@ -24,9 +23,7 @@ export default function RootLayout({ children }) {
       <body className="bg-black text-white antialiased" suppressHydrationWarning>
         <SmoothScroll>
           <Navbar />
-          <PageTransitionProvider>
-            {children}
-          </PageTransitionProvider>
+          {children}
         </SmoothScroll>
       </body>
     </html>

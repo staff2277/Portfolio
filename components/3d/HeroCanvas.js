@@ -7,7 +7,6 @@ import { WebGPURenderer } from "three/webgpu";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import HeroScene from "./HeroScene";
-import { usePageReady } from "../PageTransitionProvider";
 
 const GLTF_PATH = "/models/showroom.glb";
 const TEXTURE_PATHS = {
@@ -39,10 +38,9 @@ async function createWebGPURenderer({ canvas, antialias }) {
   return renderer;
 }
 
-export default function HeroCanvas({ heroSectionRef, spacerRef }) {
+export default function HeroCanvas({ heroSectionRef }) {
   const [gpuReady, setGpuReady] = useState(false);
   const [assets, setAssets] = useState(null); // { gltf, textures }
-  const { setReady } = usePageReady();
 
   // Stable factory ref — R3F calls this once with { canvas, ... }
   // We use useCallback so the reference never changes between renders
@@ -102,17 +100,8 @@ export default function HeroCanvas({ heroSectionRef, spacerRef }) {
 
   const ready = gpuReady && Boolean(assets);
 
-  useEffect(() => {
-    if (ready) setReady(true);
-  }, [ready, setReady]);
-
   return (
     <div className="fixed inset-0">
-      {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
-          <div className="text-xs uppercase tracking-[0.3em] text-white/40">Loading</div>
-        </div>
-      )}
       {ready && (
         // R3F Canvas manages its own <canvas> element and measures its container
         // via useMeasure on the inner wrapper div it renders. By NOT passing a
@@ -120,6 +109,7 @@ export default function HeroCanvas({ heroSectionRef, spacerRef }) {
         // computeInitialSize finds a real parentElement and size > 0.
         <Canvas
           gl={glFactory}
+          shadows
           frameloop="always"
           dpr={[1, 2]}
           style={{ width: "100%", height: "100%" }}
@@ -132,7 +122,6 @@ export default function HeroCanvas({ heroSectionRef, spacerRef }) {
             gltf={assets.gltf}
             textures={assets.textures}
             heroSectionRef={heroSectionRef}
-            spacerRef={spacerRef}
           />
         </Canvas>
       )}

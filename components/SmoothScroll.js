@@ -11,8 +11,7 @@ const LenisContext = createContext(null);
 
 /**
  * Access the app-wide Lenis instance. Returns null until it's mounted
- * (client-side only). CameraSequence uses lenis.stop()/lenis.start() to
- * scroll-jack Phase A of the hero and hand control back for Phase B.
+ * (client-side only).
  */
 export function useLenis() {
   return useContext(LenisContext);
@@ -21,7 +20,7 @@ export function useLenis() {
 /**
  * Wraps the app in a single Lenis smooth-scroll instance and wires it into
  * GSAP's ticker + ScrollTrigger, so every GSAP ScrollTrigger in the app
- * (including the hero's Phase B scrub) stays in sync with Lenis' scroll
+ * (including the hero's camera scrub) stays in sync with Lenis' scroll
  * position instead of the raw native scroll event.
  */
 export default function SmoothScroll({ children }) {
