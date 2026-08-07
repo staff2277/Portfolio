@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useThree } from "@react-three/fiber";
+import { useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import SphereShell from "./SphereShell";
@@ -33,12 +33,15 @@ const SPOTLIGHT_HEIGHT_OFFSET = 20;
 // itself still uses the live sphereTransform.position as before.
 const SPHERE_POSITION = new THREE.Vector3(0, 14.31, 0);
 
-export default function HeroScene({ gltf, textures, heroSectionRef }) {
+export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFinished }) {
   const set = useThree((state) => state.set);
   const size = useThree((state) => state.size);
 
   const mixerRef = useRef(null);
   const cameraObjRef = useRef(null);
+  const baseQuaternionRef = useRef(new THREE.Quaternion());
+  const mouseXTarget = useRef(0);
+  const currentMouseX = useRef(0);
 
   // Target the spotlight aims at -- hardcoded straight down at
   // SPHERE_POSITION rather than tracked live, same reasoning as the
@@ -110,13 +113,64 @@ export default function HeroScene({ gltf, textures, heroSectionRef }) {
     };
   }, [scene, cameraObject, gltf.animations]);
 
-  useCameraSequence({
+  const { autoplayDone } = useCameraSequence({
     mixerRef,
     cameraObjectRef: cameraObjRef,
+    baseQuaternionRef,
     fps: FPS,
     startFrame: HERO_START,
+    autoplayEndFrame: 45,
     endFrame: HERO_END,
     heroSectionRef,
+    isLoaderFinished,
+  });
+
+  // Track mouse X position once autoplay finishes
+  useEffect(() => {
+    if (!autoplayDone) return;
+
+    const handleMouseMove = (e) => {
+      // clientX range 0..width mapped to -1.0 (left half) .. +1.0 (right half)
+      const normX = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseXTarget.current = normX;
+    };
+
+    window.addEventListener("pointermove", handleMouseMove);
+    return () => {
+      window.removeEventListener("pointermove", handleMouseMove);
+    };
+  }, [autoplayDone]);
+
+  // Apply smooth mouse tilt onto camera after autoplay completes
+  useFrame((state, delta) => {
+    if (!autoplayDone || !cameraObjRef.current) return;
+
+    // Interpolate mouse X position smoothly
+    currentMouseX.current = THREE.MathUtils.damp(
+      currentMouseX.current,
+      mouseXTarget.current,
+      5,
+      delta
+    );
+
+    const camera = cameraObjRef.current;
+
+    // Ensure baseQuaternion has been captured from animation clip frame
+    if (baseQuaternionRef.current.lengthSq() === 0) {
+      baseQuaternionRef.current.copy(camera.quaternion);
+    }
+
+    // Y-axis tilt: turn camera left when mouse is on left half (-X), right when on right half (+X)
+    // Z-axis tilt: subtle roll for added dynamic perspective
+    const tiltEuler = new THREE.Euler(
+      0,
+      -currentMouseX.current * 0.07,
+      -currentMouseX.current * 0.02,
+      "YXZ"
+    );
+    const tiltQuat = new THREE.Quaternion().setFromEuler(tiltEuler);
+
+    camera.quaternion.copy(baseQuaternionRef.current).multiply(tiltQuat);
   });
 
   // Camera_Export is the camera for the whole sequence -- make it R3F's

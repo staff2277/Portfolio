@@ -38,7 +38,7 @@ async function createWebGPURenderer({ canvas, antialias }) {
   return renderer;
 }
 
-export default function HeroCanvas({ heroSectionRef, onProgress, onLoaded }) {
+export default function HeroCanvas({ heroSectionRef, onProgress, onLoaded, isLoaderFinished }) {
   const [gpuReady, setGpuReady] = useState(false);
   const [assets, setAssets] = useState(null); // { gltf, textures }
 
@@ -170,6 +170,7 @@ export default function HeroCanvas({ heroSectionRef, onProgress, onLoaded }) {
             gltf={assets.gltf}
             textures={assets.textures}
             heroSectionRef={heroSectionRef}
+            isLoaderFinished={isLoaderFinished}
           />
         </Canvas>
       )}

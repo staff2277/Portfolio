@@ -11,6 +11,7 @@ export default function Home() {
   const heroSectionRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaderFinished, setIsLoaderFinished] = useState(false);
 
   const handleProgress = useCallback((val) => {
     setProgress((prev) => Math.max(prev, val));
@@ -20,13 +21,22 @@ export default function Home() {
     setIsLoaded(true);
   }, []);
 
+  const handleTransitionComplete = useCallback(() => {
+    setIsLoaderFinished(true);
+  }, []);
+
   return (
     <>
-      <HeroLoader progress={progress} isLoaded={isLoaded} />
+      <HeroLoader
+        progress={progress}
+        isLoaded={isLoaded}
+        onTransitionComplete={handleTransitionComplete}
+      />
       <HeroCanvas
         heroSectionRef={heroSectionRef}
         onProgress={handleProgress}
         onLoaded={handleLoaded}
+        isLoaderFinished={isLoaderFinished}
       />
 
       {/* relative z-10 here (rather than a negative z-index on the canvas)
