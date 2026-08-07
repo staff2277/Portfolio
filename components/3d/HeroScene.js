@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useThree } from "@react-three/fiber";
-import { OrbitControls, useHelper } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import SphereShell from "./SphereShell";
 import { useCameraSequence } from "./useCameraScroll";
@@ -45,9 +45,6 @@ export default function HeroScene({ gltf, textures, heroSectionRef }) {
   // position above. Must still be part of the scene graph (rendered via
   // <primitive>) for SpotLight.target's matrixWorld to update.
   const spotlightTarget = useMemo(() => new THREE.Object3D(), []);
-
-  const spotlightRef = useRef();
-  useHelper(spotlightRef, THREE.SpotLightHelper, "cyan");
 
   const { scene, cameraObject, sphereTransform } = useMemo(() => {
     const sceneRoot = gltf.scene;
@@ -148,7 +145,7 @@ export default function HeroScene({ gltf, textures, heroSectionRef }) {
 
       <primitive object={spotlightTarget} position={SPHERE_POSITION} />
       <spotLight
-        ref={spotlightRef}
+        castShadow
         position={[24.8, 34.3, -3.8]}
         target={spotlightTarget}
         angle={1.22}

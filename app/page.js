@@ -1,17 +1,33 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useCallback } from "react";
 import HeroCanvas from "../components/3d/HeroCanvas";
+import HeroLoader from "../components/HeroLoader";
 
 export default function Home() {
   // Lifted here (rather than inside HeroCanvas) because heroSectionRef is
   // the pin target the GSAP ScrollTrigger in useCameraScroll.js measures
   // and pins for the whole camera sequence.
   const heroSectionRef = useRef(null);
+  const [progress, setProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const handleProgress = useCallback((val) => {
+    setProgress((prev) => Math.max(prev, val));
+  }, []);
+
+  const handleLoaded = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
 
   return (
     <>
-      <HeroCanvas heroSectionRef={heroSectionRef} />
+      <HeroLoader progress={progress} isLoaded={isLoaded} />
+      <HeroCanvas
+        heroSectionRef={heroSectionRef}
+        onProgress={handleProgress}
+        onLoaded={handleLoaded}
+      />
 
       {/* relative z-10 here (rather than a negative z-index on the canvas)
           is what guarantees this content paints above the fixed 3D layer --

@@ -38,7 +38,7 @@ async function createWebGPURenderer({ canvas, antialias }) {
   return renderer;
 }
 
-export default function HeroCanvas({ heroSectionRef }) {
+export default function HeroCanvas({ heroSectionRef, onProgress, onLoaded }) {
   const [gpuReady, setGpuReady] = useState(false);
   const [assets, setAssets] = useState(null); // { gltf, textures }
 
@@ -68,8 +68,39 @@ export default function HeroCanvas({ heroSectionRef }) {
           ? document.fonts.ready
           : Promise.resolve();
 
+      let gltfProgress = 0;
+      let loadedTexturesCount = 0;
+      const totalTextures = Object.keys(TEXTURE_PATHS).length;
+
+      const reportOverallProgress = () => {
+        if (cancelled) return;
+        // GLTF represents 70% of asset loading, textures represent 30%
+        // Max asset progress before canvas render is capped at 90%
+        const overall = Math.min(
+          Math.round(gltfProgress * 70 + (loadedTexturesCount / totalTextures) * 30),
+          90
+        );
+        onProgress?.(overall);
+      };
+
       const gltfLoad = new Promise((resolve, reject) => {
-        createGLTFLoader().load(GLTF_PATH, resolve, undefined, reject);
+        createGLTFLoader().load(
+          GLTF_PATH,
+          (gltf) => {
+            gltfProgress = 1;
+            reportOverallProgress();
+            resolve(gltf);
+          },
+          (xhr) => {
+            if (xhr.lengthComputable && xhr.total > 0) {
+              gltfProgress = Math.min(xhr.loaded / xhr.total, 1);
+            } else {
+              gltfProgress = Math.min(gltfProgress + 0.1, 0.9);
+            }
+            reportOverallProgress();
+          },
+          reject
+        );
       });
 
       const textureLoader = new THREE.TextureLoader();
@@ -77,7 +108,16 @@ export default function HeroCanvas({ heroSectionRef }) {
         Object.entries(TEXTURE_PATHS).map(
           ([key, src]) =>
             new Promise((resolve, reject) => {
-              textureLoader.load(src, (tex) => resolve([key, tex]), undefined, reject);
+              textureLoader.load(
+                src,
+                (tex) => {
+                  loadedTexturesCount++;
+                  reportOverallProgress();
+                  resolve([key, tex]);
+                },
+                undefined,
+                reject
+              );
             })
         )
       );
@@ -96,7 +136,7 @@ export default function HeroCanvas({ heroSectionRef }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [onProgress]);
 
   const ready = gpuReady && Boolean(assets);
 
@@ -116,6 +156,14 @@ export default function HeroCanvas({ heroSectionRef }) {
           camera={{ position: [0, 2, 10], fov: 50 }}
           onCreated={(state) => {
             if (typeof window !== "undefined") window.__r3fState = state;
+
+            // Wait 2 requestAnimationFrames so WebGPU completes initial frame rendering
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                onProgress?.(100);
+                onLoaded?.();
+              });
+            });
           }}
         >
           <HeroScene

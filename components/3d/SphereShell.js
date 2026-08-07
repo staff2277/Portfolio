@@ -345,14 +345,10 @@ export default function SphereShell({ position, quaternion, scale, textures }) {
         ref={shellRef}
         geometry={geometry}
         material={shellMaterial}
-        castShadow
-        receiveShadow
       />
       <mesh
         geometry={geometry}
         material={wireMaterial}
-        castShadow
-        receiveShadow
       />
       <mesh ref={coreRef} geometry={coreGeometry} material={coreMaterial} />
       <pointLight
@@ -360,9 +356,6 @@ export default function SphereShell({ position, quaternion, scale, textures }) {
         color={CORE_COLOR}
         intensity={1000}
         distance={CORE_LIGHT_CONTAINED_DISTANCE}
-        castShadow
-        shadow-bias={-0.002}
-        shadow-mapSize={[1024, 1024]}
       />
       <ambientLight color={CORE_COLOR} intensity={0.5} />
     </group>

@@ -22,7 +22,7 @@ function debugLog(...args) {
 // Section/Transition markers were removed in Blender), so this is just a
 // reasonable default for a single continuous dolly-and-rise move. Increase
 // for a slower/more deliberate scrub, decrease for snappier.
-const SCROLL_DISTANCE = "+=600vh";
+const SCROLL_DISTANCE = "+=4900vh";
 
 /**
  * Single-phase scroll-driven camera sequence: a plain GSAP ScrollTrigger
@@ -62,23 +62,28 @@ export function useCameraSequence({
 
     applyFrame(startFrame);
 
-    triggerRef.current = ScrollTrigger.create({
-      trigger: heroSectionRef.current,
-      start: "top top",
-      end: SCROLL_DISTANCE,
-      scrub: 0.3,
-      pin: true,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        const frame = gsap.utils.mapRange(0, 1, startFrame, endFrame, self.progress);
-        applyFrame(frame);
-        debugLog("onUpdate", {
-          progress: self.progress.toFixed(3),
-          frame: frame.toFixed(1),
+    const playhead = { frame: startFrame };
+    const tween = gsap.to(playhead, {
+      frame: endFrame,
+      ease: "none",
+      onUpdate: () => {
+        applyFrame(playhead.frame);
+        debugLog("tween onUpdate", {
+          frame: playhead.frame.toFixed(1),
           mixer: !!mixerRef.current,
           camera: !!cameraObjectRef.current,
         });
       },
+    });
+
+    triggerRef.current = ScrollTrigger.create({
+      trigger: heroSectionRef.current,
+      start: "top top",
+      end: SCROLL_DISTANCE,
+      animation: tween,
+      scrub: 0.3,
+      pin: true,
+      invalidateOnRefresh: true,
     });
 
     debugLog("ScrollTrigger created", {
@@ -89,6 +94,7 @@ export function useCameraSequence({
     return () => {
       triggerRef.current?.kill();
       triggerRef.current = null;
+      tween.kill();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [disabled]);
