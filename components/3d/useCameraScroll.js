@@ -33,7 +33,7 @@ export function useCameraSequence({
   baseQuaternionRef,
   fps = 24,
   startFrame = 0,
-  autoplayEndFrame = 45,
+  autoplayEndFrame = 50,
   endFrame = 110,
   heroSectionRef,
   isLoaderFinished = false,
@@ -52,7 +52,7 @@ export function useCameraSequence({
         baseQuaternionRef.current.copy(cameraObjectRef.current.quaternion);
       }
     },
-    [mixerRef, fps, cameraObjectRef, baseQuaternionRef]
+    [mixerRef, fps, cameraObjectRef, baseQuaternionRef],
   );
 
   // Set camera to initial frame (0) on mount
@@ -75,13 +75,13 @@ export function useCameraSequence({
     const tween = gsap.to(playhead, {
       frame: autoplayEndFrame,
       duration: 5,
-      ease: "power1.inOut",
+      ease: "power3.out",
       onUpdate: () => {
         applyFrame(playhead.frame);
         debugLog("autoplay frame", playhead.frame.toFixed(1));
       },
       onComplete: () => {
-        debugLog("5s camera autoplay completed at frame 45");
+        debugLog("5s camera autoplay completed");
         if (typeof document !== "undefined") {
           document.body.style.overflow = "";
         }
@@ -95,7 +95,14 @@ export function useCameraSequence({
         document.body.style.overflow = "";
       }
     };
-  }, [disabled, isLoaderFinished, autoplayDone, startFrame, autoplayEndFrame, applyFrame]);
+  }, [
+    disabled,
+    isLoaderFinished,
+    autoplayDone,
+    startFrame,
+    autoplayEndFrame,
+    applyFrame,
+  ]);
 
   // Phase 2: Scroll-driven animation frame 45 -> 110 once autoplay is done
   useEffect(() => {
@@ -132,7 +139,14 @@ export function useCameraSequence({
       triggerRef.current = null;
       tween.kill();
     };
-  }, [disabled, autoplayDone, heroSectionRef, autoplayEndFrame, endFrame, applyFrame]);
+  }, [
+    disabled,
+    autoplayDone,
+    heroSectionRef,
+    autoplayEndFrame,
+    endFrame,
+    applyFrame,
+  ]);
 
   return { autoplayDone };
 }

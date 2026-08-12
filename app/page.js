@@ -25,12 +25,16 @@ export default function Home() {
     setIsLoaderFinished(true);
   }, []);
 
+  const handleTransitionStart = useCallback(() => {
+    setIsLoaderFinished(true);
+  }, []);
+
   return (
     <>
       <HeroLoader
         progress={progress}
         isLoaded={isLoaded}
-        onTransitionComplete={handleTransitionComplete}
+        onTransitionStart={handleTransitionStart}
       />
       <HeroCanvas
         heroSectionRef={heroSectionRef}

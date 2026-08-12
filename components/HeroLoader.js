@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-export default function HeroLoader({ progress = 0, isLoaded = false, onTransitionComplete }) {
+export default function HeroLoader({ progress = 0, isLoaded = false, onTransitionStart, onTransitionComplete }) {
   const [contentVisible, setContentVisible] = useState(true);
   const [gateOpen, setGateOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -12,15 +12,16 @@ export default function HeroLoader({ progress = 0, isLoaded = false, onTransitio
   useEffect(() => {
     if (!isLoaded) return;
 
-    // Step 1: Fade out loading text/progress UI
+    // Step 1: Fade out loading text/progress UI and start camera autoplay
     const contentTimer = setTimeout(() => {
       setContentVisible(false);
+      onTransitionStart?.();
     }, 200);
 
     // Step 2: Open the split gate (Left moves Left, Right moves Right)
     const gateTimer = setTimeout(() => {
       setGateOpen(true);
-    }, 550);
+    }, 450);
 
     // Step 3: Complete transition and unmount loader
     const completeTimer = setTimeout(() => {
@@ -29,14 +30,14 @@ export default function HeroLoader({ progress = 0, isLoaded = false, onTransitio
         ScrollTrigger.refresh();
       }
       onTransitionComplete?.();
-    }, 1600);
+    }, 1500);
 
     return () => {
       clearTimeout(contentTimer);
       clearTimeout(gateTimer);
       clearTimeout(completeTimer);
     };
-  }, [isLoaded, onTransitionComplete]);
+  }, [isLoaded, onTransitionStart, onTransitionComplete]);
 
   if (hidden) return null;
 

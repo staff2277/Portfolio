@@ -125,6 +125,10 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
     isLoaderFinished,
   });
 
+  const targetQuaternionRef = useRef(new THREE.Quaternion());
+  const tiltEulerRef = useRef(new THREE.Euler(0, 0, 0, "YXZ"));
+  const tiltQuatRef = useRef(new THREE.Quaternion());
+
   // Track mouse X position once autoplay finishes
   useEffect(() => {
     if (!autoplayDone) return;
@@ -145,7 +149,7 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
   useFrame((state, delta) => {
     if (!autoplayDone || !cameraObjRef.current) return;
 
-    // Interpolate mouse X position smoothly
+    // Smoothly damp mouse X position (speed 5 for buttery smooth damping)
     currentMouseX.current = THREE.MathUtils.damp(
       currentMouseX.current,
       mouseXTarget.current,
@@ -162,15 +166,18 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
 
     // Y-axis tilt: turn camera left when mouse is on left half (-X), right when on right half (+X)
     // Z-axis tilt: subtle roll for added dynamic perspective
-    const tiltEuler = new THREE.Euler(
+    tiltEulerRef.current.set(
       0,
-      -currentMouseX.current * 0.07,
-      -currentMouseX.current * 0.02,
+      -currentMouseX.current * 0.05,
+      -currentMouseX.current * 0.015,
       "YXZ"
     );
-    const tiltQuat = new THREE.Quaternion().setFromEuler(tiltEuler);
+    tiltQuatRef.current.setFromEuler(tiltEulerRef.current);
 
-    camera.quaternion.copy(baseQuaternionRef.current).multiply(tiltQuat);
+    // Set camera quaternion cleanly to base animation frame quaternion * mouse tilt quaternion
+    camera.quaternion
+      .copy(baseQuaternionRef.current)
+      .multiply(tiltQuatRef.current);
   });
 
   // Camera_Export is the camera for the whole sequence -- make it R3F's
@@ -218,10 +225,6 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
           textures={textures}
         />
       )}
-      <OrbitControls
-        target={[SPHERE_POSITION.x, SPHERE_POSITION.y, SPHERE_POSITION.z]}
-        enableDamping
-      />
     </>
   );
 }
