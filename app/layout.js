@@ -1,6 +1,6 @@
 import './globals.css';
-import Navbar from '../components/Navbar';
 import SmoothScroll from '../components/SmoothScroll';
+import SideProgressBar from '../components/SideProgressBar';
 
 export const metadata = {
   title: 'Portfolio | Creative Developer',
@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
           else in the tree. */}
       <body className="bg-black text-white antialiased" suppressHydrationWarning>
         <SmoothScroll>
-          <Navbar />
+          <SideProgressBar />
           {children}
         </SmoothScroll>
       </body>

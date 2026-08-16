@@ -48,6 +48,7 @@ export default function Home() {
           see the comment in HeroCanvas.js for why. */}
       <div className="relative z-10 pointer-events-none">
         <section
+          id="home"
           ref={heroSectionRef}
           className="relative h-screen w-full p-8 md:p-12 pointer-events-none flex flex-col justify-between"
         >
@@ -153,11 +154,24 @@ export default function Home() {
             useCameraScroll.js, SCROLL_DISTANCE). No manual spacer div
             needed -- one would double the gap. */}
 
-        <section className="min-h-screen flex flex-col items-center justify-center px-8 bg-black pointer-events-auto">
-          <h2 className="text-3xl font-bold mb-4">Recent Works</h2>
+        <section id="work" className="min-h-screen flex flex-col items-center justify-center px-8 bg-black pointer-events-auto">
+          <h2 className="text-3xl font-bold mb-4 text-white">Work</h2>
           <p className="text-gray-400 max-w-xl text-center leading-relaxed">
-            Selected projects, coming soon.
+            Selected projects and case studies, coming soon.
           </p>
+        </section>
+
+        <section id="contact" className="min-h-screen flex flex-col items-center justify-center px-8 bg-zinc-950 pointer-events-auto border-t border-white/10">
+          <h2 className="text-3xl font-bold mb-4 text-white">Contact</h2>
+          <p className="text-gray-400 max-w-xl text-center leading-relaxed mb-6">
+            Get in touch for collaborations or inquiries.
+          </p>
+          <a
+            href="mailto:contact@example.com"
+            className="px-6 py-3 border border-white/20 hover:border-white/60 bg-black/40 backdrop-blur-md text-white rounded-full transition-all text-sm uppercase tracking-wider font-medium"
+          >
+            Say Hello
+          </a>
         </section>
       </div>
     </>

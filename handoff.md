@@ -51,6 +51,16 @@
 
 ## Change Log
 
+### 2026-08-14 — Implemented Interactive Magnetic & Bulge SVG SideProgressBar
+Implemented complete [`SideProgressBar.js`](file:///d:/Dev/Portfolio/components/SideProgressBar.js) component mounted in [`app/layout.js`](file:///d:/Dev/Portfolio/app/layout.js):
+- **Magnetic Ball Rest State:** Physics-based spring pull ($\Delta X, \Delta Y = 0.35 \times \text{delta}$) with elastic snap-back.
+- **Morph Expansion:** Click trigger warps ball into a vertical progress navigation bar with close/collapse trigger.
+- **Dynamic Organic Bulge:** SVG `<path>` bezier curve morphing driven by GSAP (`elastic.out(1, 0.4)`) dynamically projecting outward around only the hovered link.
+- **Scroll Progress & Nav Sync:** Active indicator tracer line driven by scroll percentage $\frac{\text{window.scrollY}}{\text{doc.scrollHeight} - \text{win.innerHeight}} \times 100$.
+
+### 2026-08-14 — Fixed build error: removed missing Navbar import in app/layout.js
+Fixed `Module not found: Can't resolve '../components/Navbar'` error in [app/layout.js](file:///d:/Dev/Portfolio/app/layout.js). `Navbar.js` had been previously refactored or deleted, but `app/layout.js` was still attempting to import `<Navbar />`. Removed the unused import and component usage from `app/layout.js`.
+
 ### 2026-08-01 (6) — Spotlight: hardcoded position instead of tracking sphereTransform
 User clarified the spotlight request: hardcode the sphere's actual position (Blender `0, 0, 14.31` -> loaded Y-up scene `0, 14.31, 0`) as a literal `SPHERE_POSITION` constant rather than reading it live from `sphereTransform.position`, add the height offset on top of that, and aim straight down at that same hardcoded spot. Changed in `HeroScene.js`: `SPHERE_POSITION` is now a module-level `THREE.Vector3(0, 14.31, 0)`; the spotlight and its target both use it directly and no longer depend on `sphereTransform` at all, so they render unconditionally rather than gated behind `{sphereTransform && ...}`. `SphereShell` is unchanged -- still uses the live `sphereTransform.position`.
 
