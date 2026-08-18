@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 // Icon Components
 const HomeIcon = () => (
@@ -59,46 +59,56 @@ const NAV_CONFIG = [
   { id: "contact", type: "page", label: "Contact", icon: <ContactIcon /> },
 ];
 
-// Circumference for r = 18 circle: 2 * PI * 18 ≈ 113.097
-const CIRCUMFERENCE = 113.097;
+const CIRCUMFERENCE = 113.097; // 2 * PI * 18
 
 export default function SideProgressBar() {
   const [activeId, setActiveId] = useState("home");
   const [hoveredId, setHoveredId] = useState(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const rafId = useRef(null);
 
-  // Track window scroll depth & active section
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-      const winHeight = window.innerHeight;
-      const maxScroll = docHeight - winHeight;
+  // Accurate Active Page/Section Detection based on DOM position
+  const checkActiveSection = useCallback(() => {
+    const scrollY = window.scrollY;
+    const winHeight = window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
 
-      const progress = maxScroll > 0 ? Math.min(Math.max((scrollY / maxScroll) * 100, 0), 100) : 0;
-      setScrollProgress(progress);
+    // Check if at the bottom of page -> activate contact
+    if (scrollY + winHeight >= docHeight - 50) {
+      setActiveId("contact");
+      return;
+    }
 
-      let currentActive = NAV_CONFIG[0].id;
-      for (const item of NAV_CONFIG) {
-        const el = document.getElementById(item.id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= winHeight * 0.55 && rect.bottom >= winHeight * 0.25) {
-            currentActive = item.id;
-          }
+    // Check DOM section positions
+    let currentActive = "home";
+    for (const item of NAV_CONFIG) {
+      const el = document.getElementById(item.id);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        // Section is active when its top is near viewport upper-middle
+        if (rect.top <= winHeight * 0.5 && rect.bottom >= winHeight * 0.2) {
+          currentActive = item.id;
         }
       }
-      setActiveId(currentActive);
+    }
+    setActiveId(currentActive);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(checkActiveSection);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
-    handleScroll();
+    checkActiveSection();
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, []);
+  }, [checkActiveSection]);
 
   const handleNavClick = (e, targetId) => {
     e.preventDefault();
@@ -115,19 +125,14 @@ export default function SideProgressBar() {
   return (
     <div className="fixed left-6 top-1/2 -translate-y-1/2 z-50 pointer-events-auto select-none">
       <div className="relative w-[180px] h-[400px] flex items-center">
-        {/* Track Line Container (clipped between first and last icon centers) */}
-        <div className="absolute left-[19px] top-[44px] bottom-[44px] w-[2px] bg-white/15 rounded-full overflow-hidden pointer-events-none z-0">
-          {/* Active Progress Fill Line */}
-          <div
-            className="w-full bg-cyan-400 transition-all duration-150 ease-out shadow-[0_0_8px_#22d3ee]"
-            style={{ height: `${scrollProgress}%` }}
-          />
-        </div>
+        {/* Simple static background track line connecting icons */}
+        <div className="absolute left-[19px] top-[44px] bottom-[44px] w-[2px] bg-white/15 rounded-full pointer-events-none z-0" />
 
         {/* Navigation items list */}
         <div className="relative z-10 w-[40px] flex flex-col justify-between h-full py-6 items-center">
           {NAV_CONFIG.map((item) => {
-            const isActive = activeId === item.id;
+            // Check if item or its parent page is active
+            const isActive = activeId === item.id || (item.type === "component" && activeId === item.pageId);
             const isHovered = hoveredId === item.id;
 
             if (item.type === "page") {
@@ -140,7 +145,7 @@ export default function SideProgressBar() {
                   className="group relative flex items-center justify-center cursor-pointer"
                 >
                   {/* SVG Icon Node Container */}
-                  <div className="relative w-10 h-10 flex items-center justify-center bg-black rounded-full shadow-[0_0_0_2px_rgba(0,0,0,0.8)] z-10">
+                  <div className="relative w-10 h-10 flex items-center justify-center bg-black rounded-full shadow-[0_0_0_2px_rgba(0,0,0,0.9)] z-10">
                     <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
                       {/* Base background circle outline */}
                       <circle
@@ -151,7 +156,7 @@ export default function SideProgressBar() {
                         stroke="rgba(255, 255, 255, 0.2)"
                         strokeWidth="2"
                       />
-                      {/* Clockwise outline fill circle */}
+                      {/* Outline fill circle - highlights clockwise when page is active or hovered */}
                       <circle
                         cx="20"
                         cy="20"
@@ -205,7 +210,7 @@ export default function SideProgressBar() {
               >
                 <div
                   className={`transition-all duration-300 flex items-center justify-center bg-black rounded ${
-                    isHovered
+                    isHovered || activeId === item.id
                       ? "w-full bg-cyan-400/20 py-0.5 border border-cyan-400/50"
                       : "w-2 h-2 rounded-full bg-white/30 group-hover:bg-cyan-400"
                   }`}
@@ -215,7 +220,11 @@ export default function SideProgressBar() {
                       {item.label}
                     </span>
                   ) : (
-                    <div className="w-1 h-1 rounded-full bg-white/80" />
+                    <div
+                      className={`w-1 h-1 rounded-full ${
+                        activeId === item.id ? "bg-cyan-400" : "bg-white/80"
+                      }`}
+                    />
                   )}
                 </div>
               </div>
