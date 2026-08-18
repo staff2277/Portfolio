@@ -53,7 +53,7 @@ export default function Home() {
           className="relative h-screen w-full p-8 md:p-12 pointer-events-none flex flex-col justify-between"
         >
           {/* Top Left Corner */}
-          <div className="flex flex-col items-start space-y-1">
+          <div id="hero-scene" className="flex flex-col items-start space-y-1">
             <span className="text-xs uppercase tracking-[0.25em] text-white/50">
               Portfolio / 2026
             </span>
@@ -155,10 +155,12 @@ export default function Home() {
             needed -- one would double the gap. */}
 
         <section id="work" className="min-h-screen flex flex-col items-center justify-center px-8 bg-black pointer-events-auto">
-          <h2 className="text-3xl font-bold mb-4 text-white">Work</h2>
-          <p className="text-gray-400 max-w-xl text-center leading-relaxed">
-            Selected projects and case studies, coming soon.
-          </p>
+          <div id="featured-projects" className="flex flex-col items-center justify-center">
+            <h2 className="text-3xl font-bold mb-4 text-white">Work</h2>
+            <p className="text-gray-400 max-w-xl text-center leading-relaxed">
+              Selected projects and case studies, coming soon.
+            </p>
+          </div>
         </section>
 
         <section id="contact" className="min-h-screen flex flex-col items-center justify-center px-8 bg-zinc-950 pointer-events-auto border-t border-white/10">
