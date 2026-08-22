@@ -142,6 +142,9 @@ export default function SideProgressBar() {
                   onMouseEnter={() => setHoveredId(item.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={(e) => handleNavClick(e, item.id)}
+                  data-magnetic
+                  data-magnetic-max="14"
+                  data-magnetic-radius="50"
                   className="group relative flex items-center justify-center cursor-pointer"
                 >
                   {/* SVG Icon Node Container */}

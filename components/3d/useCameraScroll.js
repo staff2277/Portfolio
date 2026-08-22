@@ -127,6 +127,7 @@ export function useCameraSequence({
       animation: tween,
       scrub: 0.3,
       pin: true,
+      refreshPriority: 1, // resolve before downstream triggers (e.g. Work section)
       invalidateOnRefresh: true,
     });
 

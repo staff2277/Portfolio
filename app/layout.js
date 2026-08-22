@@ -1,6 +1,7 @@
 import './globals.css';
 import SmoothScroll from '../components/SmoothScroll';
 import SideProgressBar from '../components/SideProgressBar';
+import MagneticButtons from '../components/MagneticButtons';
 
 export const metadata = {
   title: 'Portfolio | Creative Developer',
@@ -20,6 +21,11 @@ export default function RootLayout({ children }) {
           <SideProgressBar />
           {children}
         </SmoothScroll>
+        {/* Global, reusable magnetic-hover interaction -- see
+            components/MagneticButtons.js. Tag any button/link anywhere in
+            the tree with `data-magnetic` to opt it in; nothing else needs
+            to change. Mounted once here (site-wide), not per-page. */}
+        <MagneticButtons />
       </body>
     </html>
   );

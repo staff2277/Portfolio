@@ -3,6 +3,9 @@
 import { useRef, useState, useCallback } from "react";
 import HeroCanvas from "../components/3d/HeroCanvas";
 import HeroLoader from "../components/HeroLoader";
+import WorkSection from "../components/WorkSection";
+
+const CONTACT_EMAIL = "mustaff2277@gmail.com";
 
 export default function Home() {
   // Lifted here (rather than inside HeroCanvas) because heroSectionRef is
@@ -12,6 +15,10 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoaderFinished, setIsLoaderFinished] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [contactStatus, setContactStatus] = useState("idle"); // idle | sending | success | error
+  const [contactError, setContactError] = useState("");
 
   const handleProgress = useCallback((val) => {
     setProgress((prev) => Math.max(prev, val));
@@ -28,6 +35,47 @@ export default function Home() {
   const handleTransitionStart = useCallback(() => {
     setIsLoaderFinished(true);
   }, []);
+
+  const handleCopyEmail = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(CONTACT_EMAIL);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (older browsers, insecure context) --
+      // the mailto link right above this still works as the fallback.
+    }
+  }, []);
+
+  const handleContactFieldChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setContactForm((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleContactSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setContactStatus("sending");
+      setContactError("");
+      try {
+        const res = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(contactForm),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong sending your message.");
+        }
+        setContactStatus("success");
+        setContactForm({ name: "", email: "", message: "" });
+      } catch (err) {
+        setContactStatus("error");
+        setContactError(err.message);
+      }
+    },
+    [contactForm]
+  );
 
   return (
     <>
@@ -84,6 +132,7 @@ export default function Home() {
                 <a
                   href="/contact"
                   title="Contact"
+                  data-magnetic
                   className="p-2.5 border border-white/20 hover:border-white/60 bg-black/40 backdrop-blur-md transition-all text-white/80 hover:text-white rounded-full flex items-center justify-center"
                 >
                   <svg
@@ -107,6 +156,7 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title="X (Twitter)"
+                  data-magnetic
                   className="p-2.5 border border-white/20 hover:border-white/60 bg-black/40 backdrop-blur-md transition-all text-white/80 hover:text-white rounded-full flex items-center justify-center"
                 >
                   <svg
@@ -123,6 +173,7 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title="LinkedIn"
+                  data-magnetic
                   className="p-2.5 border border-white/20 hover:border-white/60 bg-black/40 backdrop-blur-md transition-all text-white/80 hover:text-white rounded-full flex items-center justify-center"
                 >
                   <svg
@@ -151,29 +202,189 @@ export default function Home() {
 
         {/* Scroll distance for the camera sequence (frames 0 -> 110) is
             reserved automatically by ScrollTrigger's own pinSpacing (see
-            useCameraScroll.js, SCROLL_DISTANCE). No manual spacer div
-            needed -- one would double the gap. */}
+            useCameraScroll.js, SCROLL_DISTANCE = 4900vh). No manual spacer
+            needed — one would create a dead scroll zone after the hero. */}
 
-        <section id="work" className="min-h-screen flex flex-col items-center justify-center px-8 bg-black pointer-events-auto">
-          <div id="featured-projects" className="flex flex-col items-center justify-center">
-            <h2 className="text-3xl font-bold mb-4 text-white">Work</h2>
-            <p className="text-gray-400 max-w-xl text-center leading-relaxed">
-              Selected projects and case studies, coming soon.
-            </p>
+        <WorkSection />
+
+        <section
+          id="contact"
+          className="relative min-h-screen flex flex-col items-center justify-center px-8 py-32 bg-zinc-950 pointer-events-auto border-t border-white/10 overflow-hidden"
+        >
+          {/* Ambient glow behind the mailbox -- echoes the hero's spotlit
+              sphere without competing with it; pointer-events-none so it
+              never blocks the mailto link/copy button beneath it. */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full bg-[var(--accent)]/10 blur-[120px]" />
           </div>
-        </section>
 
-        <section id="contact" className="min-h-screen flex flex-col items-center justify-center px-8 bg-zinc-950 pointer-events-auto border-t border-white/10">
-          <h2 className="text-3xl font-bold mb-4 text-white">Contact</h2>
-          <p className="text-gray-400 max-w-xl text-center leading-relaxed mb-6">
-            Get in touch for collaborations or inquiries.
-          </p>
-          <a
-            href="mailto:contact@example.com"
-            className="px-6 py-3 border border-white/20 hover:border-white/60 bg-black/40 backdrop-blur-md text-white rounded-full transition-all text-sm uppercase tracking-wider font-medium"
-          >
-            Say Hello
-          </a>
+          <div className="relative z-10 flex flex-col items-center text-center max-w-xl">
+            <span className="text-xs uppercase tracking-[0.3em] text-white/40 mb-6">
+              Contact
+            </span>
+
+            <h2 className="font-heading gradient-text text-4xl md:text-6xl leading-tight mb-6">
+              Got a project
+              <br />
+              worth building?
+            </h2>
+
+            <p className="text-white/50 max-w-md leading-relaxed mb-12">
+              Open to freelance work, collaborations, and interesting
+              problems. Reach out directly -- every email lands with me, no
+              contact form in between.
+            </p>
+
+            {/* The contact form -- posts to /api/contact, which proxies to
+                Web3Forms so the access key stays server-side. The envelope
+                icon on the submit button keeps the "mailbox" motif: the flap
+                lifts and a little letter slides up from behind it on hover,
+                same idea as the old mailto pill, just now attached to an
+                actual send action instead of opening a mail client. */}
+            <form
+              onSubmit={handleContactSubmit}
+              className="w-full glass rounded-2xl p-6 md:p-8 flex flex-col gap-5 text-left"
+            >
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="contact-name" className="text-xs uppercase tracking-widest text-white/40">
+                  Name
+                </label>
+                <input
+                  id="contact-name"
+                  name="name"
+                  type="text"
+                  required
+                  value={contactForm.name}
+                  onChange={handleContactFieldChange}
+                  placeholder="Your name"
+                  className="bg-white/5 border border-white/10 focus:border-white/30 rounded-lg px-4 py-2.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="contact-email" className="text-xs uppercase tracking-widest text-white/40">
+                  Email
+                </label>
+                <input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  required
+                  value={contactForm.email}
+                  onChange={handleContactFieldChange}
+                  placeholder="you@example.com"
+                  className="bg-white/5 border border-white/10 focus:border-white/30 rounded-lg px-4 py-2.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="contact-message" className="text-xs uppercase tracking-widest text-white/40">
+                  Message
+                </label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  required
+                  rows={5}
+                  value={contactForm.message}
+                  onChange={handleContactFieldChange}
+                  placeholder="What are you building?"
+                  className="bg-white/5 border border-white/10 focus:border-white/30 rounded-lg px-4 py-2.5 text-white/90 placeholder:text-white/25 outline-none transition-colors resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={contactStatus === "sending"}
+                data-magnetic
+                data-magnetic-max="10"
+                className="group mt-1 self-center flex items-center gap-3 px-7 py-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/30 transition-all text-sm uppercase tracking-widest text-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="relative w-6 h-6 shrink-0">
+                  {/* Letter -- slides up from behind the envelope on hover */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="absolute inset-0 w-full h-full text-white/60 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:-translate-y-1.5 transition-all duration-300 ease-out"
+                  >
+                    <rect
+                      x="6"
+                      y="1.5"
+                      width="12"
+                      height="9"
+                      rx="1"
+                      fill="currentColor"
+                      fillOpacity="0.25"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                    />
+                  </svg>
+                  {/* Envelope body */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    className="absolute inset-0 w-full h-full text-white/80"
+                  >
+                    <rect x="2" y="6" width="20" height="14" rx="2" />
+                  </svg>
+                  {/* Flap -- lifts open on hover */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    className="absolute inset-0 w-full h-full text-white/80 origin-top group-hover:-translate-y-1 transition-transform duration-300 ease-out"
+                  >
+                    <path d="M2 7l10 7 10-7" />
+                  </svg>
+                </span>
+                {contactStatus === "sending" ? "Sending" : "Send message"}
+              </button>
+
+              <div aria-live="polite" className="min-h-[1.25rem] text-center text-sm">
+                {contactStatus === "success" && (
+                  <p className="text-emerald-400/90">
+                    Message sent -- thanks, I&apos;ll get back to you soon.
+                  </p>
+                )}
+                {contactStatus === "error" && (
+                  <p className="text-red-400/90">{contactError}</p>
+                )}
+              </div>
+            </form>
+
+            <div className="flex items-center gap-2 mt-6 text-xs text-white/40 pointer-events-auto">
+              <span>Prefer email directly?</span>
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="uppercase tracking-widest text-white/60 hover:text-white transition-colors"
+              >
+                {emailCopied ? "Copied" : CONTACT_EMAIL}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-5 mt-4 pointer-events-auto">
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+              >
+                X
+              </a>
+              <span className="text-white/15">&middot;</span>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+              >
+                LinkedIn
+              </a>
+            </div>
+          </div>
         </section>
       </div>
     </>
