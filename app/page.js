@@ -4,6 +4,7 @@ import { useRef, useState, useCallback } from "react";
 import HeroCanvas from "../components/3d/HeroCanvas";
 import HeroLoader from "../components/HeroLoader";
 import WorkSection from "../components/WorkSection";
+import Interlude from "../components/Interlude";
 
 const CONTACT_EMAIL = "mustaff2277@gmail.com";
 
@@ -102,20 +103,20 @@ export default function Home() {
         >
           {/* Top Left Corner */}
           <div id="hero-scene" className="flex flex-col items-start space-y-1">
-            <span className="text-xs uppercase tracking-[0.25em] text-white/50">
+            <span className="text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.25em] text-white/50">
               Portfolio / 2026
             </span>
-            <h1 className="text-lg md:text-xl font-heading tracking-tight text-white/90">
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-heading tracking-tight text-white/90">
               Creative Developer
             </h1>
           </div>
 
           {/* Top Right Corner */}
           <div className="absolute top-8 right-8 md:top-12 md:right-12 text-right">
-            <span className="text-xs uppercase tracking-[0.25em] text-white/50 block">
+            <span className="text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.25em] text-white/50 block">
               Specialization
             </span>
-            <span className="text-xs md:text-sm text-white/80 font-light">
+            <span className="text-xs sm:text-sm lg:text-base text-white/80 font-light">
               Frontend, UI &amp; 3D design
             </span>
           </div>
@@ -124,7 +125,7 @@ export default function Home() {
           <div className="flex justify-between items-end w-full">
             {/* Bottom Left Corner - Connect & Socials */}
             <div className="flex flex-col space-y-3 pointer-events-auto">
-              <span className="text-xs uppercase tracking-[0.25em] text-white/50">
+              <span className="text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.25em] text-white/50">
                 Connect
               </span>
               <div className="flex items-center gap-3">
@@ -189,10 +190,10 @@ export default function Home() {
 
             {/* Bottom Right Corner */}
             <div className="text-right flex flex-col items-end space-y-1">
-              <span className="text-xs uppercase tracking-[0.25em] text-white/50">
+              <span className="text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.25em] text-white/50">
                 Scroll
               </span>
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/70">
+              <div className="flex items-center gap-2 text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.2em] text-white/70">
                 <span>Explore Scene</span>
                 <span className="animate-bounce">↓</span>
               </div>
@@ -205,50 +206,112 @@ export default function Home() {
             useCameraScroll.js, SCROLL_DISTANCE = 4900vh). No manual spacer
             needed — one would create a dead scroll zone after the hero. */}
 
+        {/* Aesthetic breather between Hero and Work -- see Interlude.js. */}
+        <Interlude
+          id="ethos"
+          eyebrow="How I Build"
+          text="Every interface is a small performance — motion and logic, rehearsing quietly until it feels obvious."
+          align="left"
+          signature="bar"
+        />
+
         <WorkSection />
+
+        {/* Aesthetic breather between Work and Contact -- see Interlude.js. */}
+        <Interlude
+          id="invitation"
+          eyebrow="What's Next"
+          text="If something above sparked an idea, that's usually the best time to say hello."
+          align="right"
+          signature="quote"
+        />
 
         <section
           id="contact"
-          className="relative min-h-screen flex flex-col items-center justify-center px-8 py-32 bg-zinc-950 pointer-events-auto border-t border-white/10 overflow-hidden"
+          className="relative min-h-screen flex items-center px-8 py-32 bg-zinc-950 pointer-events-auto border-t border-white/10 overflow-hidden"
         >
-          {/* Ambient glow behind the mailbox -- echoes the hero's spotlit
-              sphere without competing with it; pointer-events-none so it
-              never blocks the mailto link/copy button beneath it. */}
+          {/* Two off-center glows instead of one dead-center blob -- reads
+              less like a symmetric template, and gives the two-column
+              layout below its own light source on each side. */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full bg-[var(--accent)]/10 blur-[120px]" />
+            <div className="absolute -left-48 top-1/3 w-[520px] h-[520px] rounded-full bg-[var(--accent)]/10 blur-[140px]" />
+            <div className="absolute -right-32 bottom-0 w-[420px] h-[420px] rounded-full bg-[var(--accent)]/[0.06] blur-[130px]" />
           </div>
 
-          <div className="relative z-10 flex flex-col items-center text-center max-w-xl">
-            <span className="text-xs uppercase tracking-[0.3em] text-white/40 mb-6">
-              Contact
-            </span>
+          <div className="relative z-10 w-full max-w-6xl mx-auto grid md:grid-cols-[1fr_1.15fr] gap-16 md:gap-24 items-center">
+            {/* Left column: narrative + lightweight fallback contact,
+                left-aligned so it reads as a header next to the form
+                rather than a centered block sitting above it. */}
+            <div className="flex flex-col text-left">
+              <span className="text-xs uppercase tracking-[0.3em] text-white/40 mb-6">
+                Contact
+              </span>
 
-            <h2 className="font-heading gradient-text text-4xl md:text-6xl leading-tight mb-6">
-              Got a project
-              <br />
-              worth building?
-            </h2>
+              <h2 className="font-heading gradient-text text-4xl md:text-6xl leading-[1.05] mb-6">
+                Got a project
+                <br />
+                worth building?
+              </h2>
 
-            <p className="text-white/50 max-w-md leading-relaxed mb-12">
-              Open to freelance work, collaborations, and interesting
-              problems. Reach out directly -- every email lands with me, no
-              contact form in between.
-            </p>
+              <p className="text-white/50 max-w-sm leading-relaxed mb-10">
+                Open to freelance work, collaborations, and interesting
+                problems. Reach out directly -- every message lands with me,
+                no middleman in between.
+              </p>
 
-            {/* The contact form -- posts to /api/contact, which proxies to
-                Web3Forms so the access key stays server-side. The envelope
-                icon on the submit button keeps the "mailbox" motif: the flap
-                lifts and a little letter slides up from behind it on hover,
-                same idea as the old mailto pill, just now attached to an
-                actual send action instead of opening a mail client. */}
+              <div className="flex items-center gap-2 text-sm mb-6 pointer-events-auto">
+                <span className="text-white/40">Prefer email directly?</span>
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="text-white/70 hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/50"
+                >
+                  {emailCopied ? "Copied" : CONTACT_EMAIL}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-5 pointer-events-auto">
+                <a
+                  href="https://x.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                >
+                  X
+                </a>
+                <span className="text-white/15">&middot;</span>
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                >
+                  LinkedIn
+                </a>
+              </div>
+            </div>
+
+            {/* Right column: the form itself. Posts to /api/contact, which
+                proxies to Web3Forms so the access key stays server-side.
+                Icon-prefixed fields and an accent focus ring replace the
+                old plain boxes; the envelope on the submit button keeps the
+                "mailbox" motif -- flap lifts, a letter slides up behind it
+                on hover. */}
             <form
               onSubmit={handleContactSubmit}
-              className="w-full glass rounded-2xl p-6 md:p-8 flex flex-col gap-5 text-left"
+              className="w-full glass rounded-3xl p-8 md:p-10 flex flex-col gap-6 text-left"
             >
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="contact-name" className="text-xs uppercase tracking-widest text-white/40">
-                  Name
-                </label>
+              <div className="relative">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+                  <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
                 <input
                   id="contact-name"
                   name="name"
@@ -257,14 +320,20 @@ export default function Home() {
                   value={contactForm.name}
                   onChange={handleContactFieldChange}
                   placeholder="Your name"
-                  className="bg-white/5 border border-white/10 focus:border-white/30 rounded-lg px-4 py-2.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
+                  className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent)]/60 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="contact-email" className="text-xs uppercase tracking-widest text-white/40">
-                  Email
-                </label>
+              <div className="relative">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
                 <input
                   id="contact-email"
                   name="email"
@@ -273,14 +342,20 @@ export default function Home() {
                   value={contactForm.email}
                   onChange={handleContactFieldChange}
                   placeholder="you@example.com"
-                  className="bg-white/5 border border-white/10 focus:border-white/30 rounded-lg px-4 py-2.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
+                  className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent)]/60 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="contact-message" className="text-xs uppercase tracking-widest text-white/40">
-                  Message
-                </label>
+              <div className="relative">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className="absolute left-4 top-4 w-4 h-4 text-white/30"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8m-8 4h5M7 3h10a2 2 0 012 2v14l-4-3H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                </svg>
                 <textarea
                   id="contact-message"
                   name="message"
@@ -289,7 +364,7 @@ export default function Home() {
                   value={contactForm.message}
                   onChange={handleContactFieldChange}
                   placeholder="What are you building?"
-                  className="bg-white/5 border border-white/10 focus:border-white/30 rounded-lg px-4 py-2.5 text-white/90 placeholder:text-white/25 outline-none transition-colors resize-none"
+                  className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent)]/60 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors resize-none"
                 />
               </div>
 
@@ -298,13 +373,13 @@ export default function Home() {
                 disabled={contactStatus === "sending"}
                 data-magnetic
                 data-magnetic-max="10"
-                className="group mt-1 self-center flex items-center gap-3 px-7 py-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/30 transition-all text-sm uppercase tracking-widest text-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group mt-1 flex items-center justify-center gap-3 px-7 py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 transition-all text-sm uppercase tracking-widest text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="relative w-6 h-6 shrink-0">
                   {/* Letter -- slides up from behind the envelope on hover */}
                   <svg
                     viewBox="0 0 24 24"
-                    className="absolute inset-0 w-full h-full text-white/60 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:-translate-y-1.5 transition-all duration-300 ease-out"
+                    className="absolute inset-0 w-full h-full text-black/50 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:-translate-y-1.5 transition-all duration-300 ease-out"
                   >
                     <rect
                       x="6"
@@ -313,7 +388,7 @@ export default function Home() {
                       height="9"
                       rx="1"
                       fill="currentColor"
-                      fillOpacity="0.25"
+                      fillOpacity="0.4"
                       stroke="currentColor"
                       strokeWidth="1"
                     />
@@ -324,7 +399,7 @@ export default function Home() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.5"
-                    className="absolute inset-0 w-full h-full text-white/80"
+                    className="absolute inset-0 w-full h-full text-black/80"
                   >
                     <rect x="2" y="6" width="20" height="14" rx="2" />
                   </svg>
@@ -334,7 +409,7 @@ export default function Home() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.5"
-                    className="absolute inset-0 w-full h-full text-white/80 origin-top group-hover:-translate-y-1 transition-transform duration-300 ease-out"
+                    className="absolute inset-0 w-full h-full text-black/80 origin-top group-hover:-translate-y-1 transition-transform duration-300 ease-out"
                   >
                     <path d="M2 7l10 7 10-7" />
                   </svg>
@@ -353,37 +428,6 @@ export default function Home() {
                 )}
               </div>
             </form>
-
-            <div className="flex items-center gap-2 mt-6 text-xs text-white/40 pointer-events-auto">
-              <span>Prefer email directly?</span>
-              <button
-                type="button"
-                onClick={handleCopyEmail}
-                className="uppercase tracking-widest text-white/60 hover:text-white transition-colors"
-              >
-                {emailCopied ? "Copied" : CONTACT_EMAIL}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-5 mt-4 pointer-events-auto">
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors"
-              >
-                X
-              </a>
-              <span className="text-white/15">&middot;</span>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors"
-              >
-                LinkedIn
-              </a>
-            </div>
           </div>
         </section>
       </div>

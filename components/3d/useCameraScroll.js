@@ -8,7 +8,7 @@ import * as THREE from "three";
 gsap.registerPlugin(ScrollTrigger);
 
 // TEMP DEBUG -- remove once the hero sequence is confirmed working.
-const DEBUG = true;
+const DEBUG = false;
 let lastLogTime = 0;
 function debugLog(...args) {
   if (!DEBUG) return;
@@ -19,6 +19,15 @@ function debugLog(...args) {
 }
 
 // How far the user has to scroll to traverse the remaining clip (frame 45 -> 110).
+// This is the single knob that controls perceived camera speed: it's a
+// straight ratio (scroll pixels per animation frame), so slower camera
+// motion necessarily means more scroll distance -- there's no way to
+// decouple the two without intercepting wheel/touch events manually and
+// scaling their delta (the old "wheel-jack" approach -- see handoff.md's
+// 2026-07-31/08-01 entries for why that was torn out: pinSpacing collapse,
+// momentum-handoff bugs, non-monotonic progress). Tune this constant to
+// taste instead. Confirmed by user as their intentional value -- do not
+// "fix" this back down without checking with them first.
 const SCROLL_DISTANCE = "+=4900vh";
 
 /**
@@ -125,7 +134,9 @@ export function useCameraSequence({
       start: "top top",
       end: SCROLL_DISTANCE,
       animation: tween,
-      scrub: 0.3,
+      scrub: 0.5, // bumped from 0.3 -- slightly more smoothing so fast wheel
+      // flicks don't snap through frames as abruptly, independent of
+      // SCROLL_DISTANCE.
       pin: true,
       refreshPriority: 1, // resolve before downstream triggers (e.g. Work section)
       invalidateOnRefresh: true,

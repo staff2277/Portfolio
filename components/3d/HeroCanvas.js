@@ -18,7 +18,10 @@ const TEXTURE_PATHS = {
 
 function createGLTFLoader() {
   const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.7/");
+  // Self-hosted from public/draco/ (files were already present, unused --
+  // this was pointed at the gstatic CDN, adding an avoidable external
+  // round-trip on every load instead of serving from the same origin).
+  dracoLoader.setDecoderPath("/draco/");
   const loader = new GLTFLoader();
   loader.setDRACOLoader(dracoLoader);
   return loader;
