@@ -1,5 +1,14 @@
 # Handoff Notes — Portfolio Project
 
+### 2026-09-07 — Scoped the loading-screen preload to hero-only assets
+User asked to "limit the loader preload to only assets in the hero section." Audited `HeroCanvas.js`'s preload effect (the one that drives `HeroLoader`'s progress bar) first -- it already only ever fetches `showroom.glb` and the four sphere bake textures, nothing outside the hero. The actual leak was in `WorkSection.js`: every `MockupCard` for all 3 projects is permanently mounted from the moment `WorkSection` mounts (by design, for the scroll-driven crossfade -- see the comment above `computeTransitionStyle`), and each one's screenshot was a plain `backgroundImage: url(...)`. CSS background-images fetch the instant they're in the DOM regardless of opacity/visibility, so all 12 Work screenshots (3 projects x 4 images each) were being requested by the browser at the same time as the hero's GLTF/textures -- competing for bandwidth during the exact window `HeroLoader`'s progress bar is measuring, even though those images have nothing to do with the hero.
+
+**Fix:** added an `imagesEnabled` state (default `false`) to `WorkSection`, gated by a new `IntersectionObserver` on `containerRef` with `rootMargin: "400px 0px"` -- it flips `true` (once, then disconnects) only once the Work section is actually approaching the viewport, well after the hero has already loaded and been scrolled past. `MockupCard` now takes an `imagesEnabled` prop and renders `backgroundImage: imagesEnabled ? url(${imgSrc}) : "none"`, so the fetch doesn't fire until then. Threaded the prop through both the tablet and desktop `MockupCard` call sites (mobile layout doesn't render `MockupCard` at all, so nothing to change there).
+
+Files touched: `components/WorkSection.js` only. `HeroCanvas.js`/`HeroScene.js` untouched -- their preload scope was already correct.
+
+**Not yet verified by me:** no browser/execute access this session. User should hard-refresh with devtools' Network tab open, confirm only `showroom.glb` + the 4 sphere textures load during the `HeroLoader` progress bar, and confirm the 12 Work screenshots only start fetching once scrolled near the Work section (watch the Network waterfall timestamps), with no visible pop-in/flash when they do land.
+
 ### 2026-08-29 (6) — Made hero section text responsive across the full breakpoint range
 User asked for the hero HUD text to actually resize with screen size -- previously most of it only had a single `md:` step (one jump at 768px, then flat forever in both directions), so it looked identical on a 1024px laptop and a 3440px ultrawide, and could feel cramped right at small-phone widths below that one breakpoint.
 

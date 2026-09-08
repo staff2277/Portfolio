@@ -179,7 +179,7 @@ function CenterBlock({ t, index, project, onNavigate, variant = "desktop" }) {
 
 /* Browser-window mockup, one per project, permanently mounted and
    crossfaded the same continuous way as the titles. */
-function MockupCard({ t, index, project, imageIndex, variant = "desktop" }) {
+function MockupCard({ t, index, project, imageIndex, variant = "desktop", imagesEnabled }) {
   const opacity = useTransform(t, (v) => computeTransitionStyle(v, index, 0, MOCKUP_STYLE).opacity);
   const scale = useTransform(t, (v) => computeTransitionStyle(v, index, 0, MOCKUP_STYLE).scale);
   const blur = useTransform(t, (v) => computeTransitionStyle(v, index, 0, MOCKUP_STYLE).blur);
@@ -241,7 +241,11 @@ function MockupCard({ t, index, project, imageIndex, variant = "desktop" }) {
             <div
               className="relative w-full h-full"
               style={{
-                backgroundImage: `url(${imgSrc})`,
+                // Gated by imagesEnabled (set by the IntersectionObserver
+                // in WorkSection) so the browser doesn't fetch this the
+                // instant the component mounts -- see the comment on
+                // imagesEnabled in WorkSection for why.
+                backgroundImage: imagesEnabled ? `url(${imgSrc})` : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
@@ -277,6 +281,16 @@ export default function WorkSection() {
   const lenis = useLenis();
   const [activeIndex, setActiveIndex] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
+  // Every MockupCard is permanently mounted (see comment above
+  // computeTransitionStyle) so the crossfade never re-triggers a
+  // mount/unmount. That means a plain `backgroundImage: url(...)` fires
+  // its network request the instant WorkSection mounts -- right alongside
+  // the hero's own GLTF/texture preload, competing for bandwidth during
+  // the exact window the HeroLoader progress bar is measuring. imagesEnabled
+  // defers that fetch until this section is actually approaching the
+  // viewport (see IntersectionObserver effect below), keeping the loader's
+  // preload scoped to hero assets only.
+  const [imagesEnabled, setImagesEnabled] = useState(false);
   /* Continuous scroll position across all projects (e.g. 1.4 = 40% of the
      way through project 1's dwell). Drives every title/mockup transition
      directly — see computeTransitionStyle above. Not React state: updating
@@ -296,6 +310,31 @@ export default function WorkSection() {
   useEffect(() => {
     setImageIndex(0);
   }, [activeIndex]);
+
+  /* Enable Work section screenshot fetches only once the section is
+     actually approaching the viewport, instead of the instant this
+     component mounts (which happens on initial page load, alongside the
+     hero's own GLTF/texture preload). 400px rootMargin gives the images a
+     head-start so they're ready before the section is scrolled into full
+     view, without front-loading them at page load. */
+  useEffect(() => {
+    if (imagesEnabled) return;
+    const node = containerRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setImagesEnabled(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px", threshold: 0 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [imagesEnabled]);
 
   /* --- GSAP scroll-pin --- */
   useEffect(() => {
@@ -547,6 +586,7 @@ export default function WorkSection() {
               project={p}
               imageIndex={imageIndex}
               variant="tablet"
+              imagesEnabled={imagesEnabled}
             />
           ))}
         </div>
@@ -638,7 +678,14 @@ export default function WorkSection() {
         >
           {/* Browser window mockup */}
           {projects.map((p, i) => (
-            <MockupCard key={`mockup-${p.id}`} t={t} index={i} project={p} imageIndex={imageIndex} />
+            <MockupCard
+              key={`mockup-${p.id}`}
+              t={t}
+              index={i}
+              project={p}
+              imageIndex={imageIndex}
+              imagesEnabled={imagesEnabled}
+            />
           ))}
         </div>
       </div>
