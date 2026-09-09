@@ -105,7 +105,7 @@ const RIM_INTENSITY = 3.5;
 // growth = pulse * IDLE_PULSE_AMOUNT  =>  scale = 1 + pulse * (IDLE_PULSE_AMOUNT / CORE_RADIUS)
 const CORE_PULSE_SCALE = IDLE_PULSE_AMOUNT / CORE_RADIUS;
 
-export default function SphereShell({ position, quaternion, scale, textures }) {
+export default function SphereShell({ position, quaternion, scale, textures, active = true }) {
   const { camera } = useThree();
 
   const shellRef = useRef(null);
@@ -224,6 +224,12 @@ export default function SphereShell({ position, quaternion, scale, textures }) {
 
   // Converted from the source's animate() body.
   useFrame(() => {
+    // Paused (see HeroScene's sceneActive) once the hero scrolls out of
+    // view or the tab goes inactive -- the pulse is time-driven off
+    // performance.now() % 3.0, not accumulated state, so simply skipping
+    // this body freezes it cleanly with no jump/catch-up when it resumes.
+    if (!active) return;
+
     const sphereShell = shellRef.current;
     const coreMesh = coreRef.current;
     const coreLight = coreLightRef.current;

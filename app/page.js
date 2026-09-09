@@ -4,7 +4,9 @@ import { useRef, useState, useCallback } from "react";
 import HeroCanvas from "../components/3d/HeroCanvas";
 import HeroLoader from "../components/HeroLoader";
 import WorkSection from "../components/WorkSection";
-import Interlude from "../components/Interlude";
+import ThreeDWorksSection from "../components/ThreeDWorksSection";
+import EthosSection from "../components/EthosSection";
+import InvitationSection from "../components/InvitationSection";
 
 const CONTACT_EMAIL = "mustaff2277@gmail.com";
 
@@ -112,7 +114,7 @@ export default function Home() {
           </div>
 
           {/* Top Right Corner */}
-          <div className="absolute top-8 right-8 md:top-12 md:right-12 text-right">
+          <div className="hidden md:block absolute top-8 right-8 md:top-12 md:right-12 text-right">
             <span className="text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.25em] text-white/50 block">
               Specialization
             </span>
@@ -124,7 +126,7 @@ export default function Home() {
           {/* Bottom Left & Bottom Right flex layout container */}
           <div className="flex justify-between items-end w-full">
             {/* Bottom Left Corner - Connect & Socials */}
-            <div className="flex flex-col space-y-3 pointer-events-auto">
+            <div className="hidden md:flex flex-col space-y-3 pointer-events-auto">
               <span className="text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.25em] text-white/50">
                 Connect
               </span>
@@ -206,25 +208,19 @@ export default function Home() {
             useCameraScroll.js, SCROLL_DISTANCE = 4900vh). No manual spacer
             needed — one would create a dead scroll zone after the hero. */}
 
-        {/* Aesthetic breather between Hero and Work -- see Interlude.js. */}
-        <Interlude
-          id="ethos"
-          eyebrow="How I Build"
-          text="Every interface is a small performance — motion and logic, rehearsing quietly until it feels obvious."
-          align="left"
-          signature="bar"
-        />
+        {/* "How I Build" -- was an <Interlude id="ethos" .../>, now its
+            own component with a scroll-driven left-to-right word stagger.
+            See EthosSection.js for the effect breakdown. */}
+        <EthosSection />
 
         <WorkSection />
 
-        {/* Aesthetic breather between Work and Contact -- see Interlude.js. */}
-        <Interlude
-          id="invitation"
-          eyebrow="What's Next"
-          text="If something above sparked an idea, that's usually the best time to say hello."
-          align="right"
-          signature="quote"
-        />
+        <ThreeDWorksSection />
+
+        {/* "What's Next" -- was an <Interlude id="invitation" .../>, now
+            reusing the same left-to-right scroll stagger as EthosSection.
+            See InvitationSection.js. */}
+        <InvitationSection />
 
         <section
           id="contact"
@@ -234,8 +230,8 @@ export default function Home() {
               less like a symmetric template, and gives the two-column
               layout below its own light source on each side. */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -left-48 top-1/3 w-[520px] h-[520px] rounded-full bg-[var(--accent)]/10 blur-[140px]" />
-            <div className="absolute -right-32 bottom-0 w-[420px] h-[420px] rounded-full bg-[var(--accent)]/[0.06] blur-[130px]" />
+            <div className="accent2-glow-a absolute -left-48 top-1/3 w-[520px] h-[520px] rounded-full blur-[140px]" />
+            <div className="accent2-glow-b absolute -right-32 bottom-0 w-[420px] h-[420px] rounded-full blur-[130px]" />
           </div>
 
           <div className="relative z-10 w-full max-w-6xl mx-auto grid md:grid-cols-[1fr_1.15fr] gap-16 md:gap-24 items-center">
@@ -320,7 +316,7 @@ export default function Home() {
                   value={contactForm.name}
                   onChange={handleContactFieldChange}
                   placeholder="Your name"
-                  className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent)]/60 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
+                  className="accent2-focus w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
                 />
               </div>
 
@@ -342,7 +338,7 @@ export default function Home() {
                   value={contactForm.email}
                   onChange={handleContactFieldChange}
                   placeholder="you@example.com"
-                  className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent)]/60 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
+                  className="accent2-focus w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors"
                 />
               </div>
 
@@ -364,7 +360,7 @@ export default function Home() {
                   value={contactForm.message}
                   onChange={handleContactFieldChange}
                   placeholder="What are you building?"
-                  className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent)]/60 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors resize-none"
+                  className="accent2-focus w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white/90 placeholder:text-white/25 outline-none transition-colors resize-none"
                 />
               </div>
 
@@ -373,7 +369,7 @@ export default function Home() {
                 disabled={contactStatus === "sending"}
                 data-magnetic
                 data-magnetic-max="10"
-                className="group mt-1 flex items-center justify-center gap-3 px-7 py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 transition-all text-sm uppercase tracking-widest text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="accent2-btn group mt-1 flex items-center justify-center gap-3 px-7 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="relative w-6 h-6 shrink-0">
                   {/* Letter -- slides up from behind the envelope on hover */}

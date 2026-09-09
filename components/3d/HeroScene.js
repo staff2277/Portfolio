@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -36,6 +36,17 @@ const SPHERE_POSITION = new THREE.Vector3(0, 14.31, 0);
 export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFinished }) {
   const set = useThree((state) => state.set);
   const size = useThree((state) => state.size);
+
+  // Whether the sphere's shader-driven pulse/hover animation should keep
+  // running -- true only while the hero section is actually on screen AND
+  // the browser tab is the active/visible one. Two independent signals:
+  // an IntersectionObserver on heroSectionRef (scrolled past the hero =
+  // no longer intersecting) and the page Visibility API (tab switched
+  // away or window minimized). Either one going false pauses the effect;
+  // both must be true to resume. This only pauses -- see SphereShell's
+  // useFrame guard -- it does not touch the pulse/hover logic itself,
+  // which is intentional and off-limits (see handoff.md, 2026-07-31).
+  const [sceneActive, setSceneActive] = useState(true);
 
   const mixerRef = useRef(null);
   const cameraObjRef = useRef(null);
@@ -180,6 +191,42 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
       .multiply(tiltQuatRef.current);
   });
 
+  // Drives sceneActive above from the two independent signals described
+  // there. heroVisible/tabVisible are plain closures (not state) since
+  // they're only ever read inside update() -- no need to re-render on
+  // each one individually, only on the combined result changing.
+  useEffect(() => {
+    let heroVisible = true;
+    let tabVisible =
+      typeof document !== "undefined" ? document.visibilityState === "visible" : true;
+
+    const update = () => setSceneActive(heroVisible && tabVisible);
+
+    const handleVisibilityChange = () => {
+      tabVisible = document.visibilityState === "visible";
+      update();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    let observer;
+    const node = heroSectionRef?.current;
+    if (node && typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          heroVisible = entry.isIntersecting;
+          update();
+        },
+        { threshold: 0 }
+      );
+      observer.observe(node);
+    }
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      observer?.disconnect();
+    };
+  }, [heroSectionRef]);
+
   // Camera_Export is the camera for the whole sequence -- make it R3F's
   // active render camera instead of the default.
   useEffect(() => {
@@ -223,6 +270,7 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
           quaternion={sphereTransform.quaternion}
           scale={sphereTransform.scale}
           textures={textures}
+          active={sceneActive}
         />
       )}
     </>

@@ -19,8 +19,18 @@
 :root {
   --background: #050505;
   --foreground: #f0f0f0;
-  --accent: #0070f3;
-  --accent-glow: rgba(0, 112, 243, 0.3);
+  /* Sitewide accent -- now the same cyan (#27f5ee) used in Contact and
+     Ethos, extended here so it applies everywhere else that references
+     this variable (currently: ThreeDWorksSection's ambient glow). */
+  --accent: #27f5ee;
+  --accent-glow: rgba(39, 245, 238, 0.3);
+  /* Historically kept separate from --accent for the Tailwind-arbitrary-
+     value workaround below (see .accent2-* classes) -- now the same color
+     as --accent above, kept as its own variable/classes since Contact and
+     Ethos already reference them and there's no reason to churn those
+     again. */
+  --accent-2: #27f5ee;
+  --accent-2-glow: rgba(39, 245, 238, 0.3);
 }
 
 * {
@@ -55,4 +65,34 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: linear-gradient(135deg, #fff 0%, #888 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Plain hand-written CSS for the Contact + Ethos accent color (#27f5ee),
+   instead of Tailwind arbitrary-value classes like bg-[var(--accent-2)].
+   Those weren't rendering even after a dev-server restart -- something
+   about Tailwind's JIT scanner and this particular bracket pattern isn't
+   picking it up -- so these bypass that mechanism entirely with selectors
+   Tailwind doesn't need to generate anything for. */
+.accent2-glow-a {
+  background-color: rgba(39, 245, 238, 0.1);
+}
+
+.accent2-glow-b {
+  background-color: rgba(39, 245, 238, 0.06);
+}
+
+.accent2-underline {
+  background-color: #27f5ee;
+}
+
+.accent2-focus:focus {
+  border-color: rgba(39, 245, 238, 0.6);
+}
+
+.accent2-btn {
+  background-color: #27f5ee;
+}
+
+.accent2-btn:hover {
+  background-color: rgba(39, 245, 238, 0.9);
 }

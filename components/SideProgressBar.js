@@ -51,11 +51,17 @@ const ContactIcon = () => (
   </svg>
 );
 
+// Only real, navigable pages/sections live here now. Two "component"
+// sub-items used to sit between Home/Work and Work/Contact ("3D Experience",
+// "Featured") but didn't correspond to distinct pages a visitor could land
+// on -- "featured-projects" had no matching DOM id at all (dead click,
+// never active), and "hero-scene" only pointed at a small text block inside
+// the Home hero, not a separate destination. Removed both rather than wire
+// them to something real, since Home/Work/Contact already cover every
+// actual page on the site.
 const NAV_CONFIG = [
   { id: "home", type: "page", label: "Home", icon: <HomeIcon /> },
-  { id: "hero-scene", type: "component", label: "3D Experience", pageId: "home" },
   { id: "work", type: "page", label: "Works", icon: <WorkIcon /> },
-  { id: "featured-projects", type: "component", label: "Featured", pageId: "work" },
   { id: "contact", type: "page", label: "Contact", icon: <ContactIcon /> },
 ];
 
@@ -165,7 +171,7 @@ export default function SideProgressBar() {
                         cy="20"
                         r="18"
                         fill="transparent"
-                        stroke={isActive ? "#22d3ee" : "#ffffff"}
+                        stroke={isActive ? "#27f5ee" : "#ffffff"}
                         strokeWidth="2"
                         strokeDasharray={CIRCUMFERENCE}
                         strokeDashoffset={isHovered || isActive ? 0 : CIRCUMFERENCE}
@@ -178,7 +184,7 @@ export default function SideProgressBar() {
                     <div
                       className={`z-10 transition-colors duration-300 ${
                         isActive
-                          ? "text-cyan-400"
+                          ? "text-[#27f5ee]"
                           : isHovered
                           ? "text-white"
                           : "text-white/60"
@@ -214,18 +220,18 @@ export default function SideProgressBar() {
                 <div
                   className={`transition-all duration-300 flex items-center justify-center bg-black rounded ${
                     isHovered || activeId === item.id
-                      ? "w-full bg-cyan-400/20 py-0.5 border border-cyan-400/50"
-                      : "w-2 h-2 rounded-full bg-white/30 group-hover:bg-cyan-400"
+                      ? "w-full bg-[#27f5ee]/20 py-0.5 border border-[#27f5ee]/50"
+                      : "w-2 h-2 rounded-full bg-white/30 group-hover:bg-[#27f5ee]"
                   }`}
                 >
                   {isHovered ? (
-                    <span className="text-[10px] font-semibold tracking-wider uppercase text-cyan-300 whitespace-nowrap px-1">
+                    <span className="text-[10px] font-semibold tracking-wider uppercase text-[#27f5ee] whitespace-nowrap px-1">
                       {item.label}
                     </span>
                   ) : (
                     <div
                       className={`w-1 h-1 rounded-full ${
-                        activeId === item.id ? "bg-cyan-400" : "bg-white/80"
+                        activeId === item.id ? "bg-[#27f5ee]" : "bg-white/80"
                       }`}
                     />
                   )}
