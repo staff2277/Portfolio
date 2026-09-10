@@ -50,6 +50,13 @@ export function useCameraSequence({
 }) {
   const triggerRef = useRef(null);
   const [autoplayDone, setAutoplayDone] = useState(false);
+  // Updated on every ScrollTrigger tick during Phase 2 (0 at the top of the
+  // hero, 1 at the end of the scroll-driven clip). Exposed as a ref rather
+  // than state since HeroScene only ever needs to read the latest value
+  // inside a useFrame loop -- turning this into state would re-render on
+  // every scroll tick for no benefit. See HeroScene.js's tilt cooldown for
+  // the consumer.
+  const scrollProgressRef = useRef(0);
 
   const applyFrame = useCallback(
     (frame) => {
@@ -140,6 +147,9 @@ export function useCameraSequence({
       pin: true,
       refreshPriority: 1, // resolve before downstream triggers (e.g. Work section)
       invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        scrollProgressRef.current = self.progress;
+      },
     });
 
     ScrollTrigger.refresh();
@@ -160,5 +170,5 @@ export function useCameraSequence({
     applyFrame,
   ]);
 
-  return { autoplayDone };
+  return { autoplayDone, scrollProgressRef };
 }

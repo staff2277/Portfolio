@@ -96,3 +96,22 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .accent2-btn:hover {
   background-color: rgba(39, 245, 238, 0.9);
 }
+
+/* HeroLoader -- was hardcoded Tailwind blue (blue-500/600, indigo-400,
+   rgba(59,130,246,...)). Same plain-CSS technique as .accent2-* above. */
+.accent2-loader-edge {
+  background: linear-gradient(to bottom, transparent, rgba(39, 245, 238, 0.4), transparent);
+}
+
+.accent2-loader-dot {
+  background-color: #27f5ee;
+}
+
+.accent2-loader-percent {
+  color: #27f5ee;
+}
+
+.accent2-loader-bar {
+  background: linear-gradient(to right, #27f5ee, rgba(39, 245, 238, 0.7), #ffffff);
+  box-shadow: 0 0 12px rgba(39, 245, 238, 0.8);
+}

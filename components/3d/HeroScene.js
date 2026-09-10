@@ -124,7 +124,7 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
     };
   }, [scene, cameraObject, gltf.animations]);
 
-  const { autoplayDone } = useCameraSequence({
+  const { autoplayDone, scrollProgressRef } = useCameraSequence({
     mixerRef,
     cameraObjectRef: cameraObjRef,
     baseQuaternionRef,
@@ -139,11 +139,32 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
   const targetQuaternionRef = useRef(new THREE.Quaternion());
   const tiltEulerRef = useRef(new THREE.Euler(0, 0, 0, "YXZ"));
   const tiltQuatRef = useRef(new THREE.Quaternion());
+  // Tilt-cooldown bookkeeping -- see the two effects/useFrame checks below
+  // for the full explanation. tiltCooldownStartRef holds a performance.now()
+  // timestamp while a 2s fade-in is in progress, or null when the tilt is
+  // at full strength with no cooldown active. prevScrollProgressRef lets
+  // the useFrame below detect the specific >0 -> 0 crossing (scrolling back
+  // to the top of the hero) rather than firing on every frame already at 0.
+  const tiltCooldownStartRef = useRef(null);
+  const prevScrollProgressRef = useRef(0);
 
-  // Track mouse X position once autoplay finishes
+  // Scenario 1: autoplay just finished. At this exact instant scroll
+  // progress is 0 and the mouse-tilt effect (gated on autoplayDone below)
+  // is about to start contributing for the first time -- previously this
+  // was the jarring "camera snaps onto the tilted path" moment. Starting
+  // the cooldown here means the tilt fades in over 2s instead of snapping
+  // to full strength immediately.
   useEffect(() => {
-    if (!autoplayDone) return;
+    if (autoplayDone) {
+      tiltCooldownStartRef.current = performance.now();
+    }
+  }, [autoplayDone]);
 
+  // Track mouse X position from mount -- NOT gated by autoplayDone.
+  // This ensures mouseXTarget always reflects the real mouse position,
+  // so when the tilt effect activates there's no jump from 0 to the
+  // actual edge position.
+  useEffect(() => {
     const handleMouseMove = (e) => {
       // clientX range 0..width mapped to -1.0 (left half) .. +1.0 (right half)
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -154,18 +175,48 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
     return () => {
       window.removeEventListener("pointermove", handleMouseMove);
     };
-  }, [autoplayDone]);
+  }, []);
 
   // Apply smooth mouse tilt onto camera after autoplay completes
   useFrame((state, delta) => {
     if (!autoplayDone || !cameraObjRef.current) return;
+
+    // Scenario 2: user scrolled back down to progress 0 (the same jarring
+    // snap as Scenario 1 above, just triggered by scroll direction instead
+    // of autoplay finishing). Only fires on the >0 -> 0 crossing itself, not
+    // on every subsequent frame that's already sitting at 0.
+    const scrollProgress = scrollProgressRef.current;
+    if (scrollProgress <= 0.0001 && prevScrollProgressRef.current > 0.0001) {
+      tiltCooldownStartRef.current = performance.now();
+    }
+    prevScrollProgressRef.current = scrollProgress;
+
+    // Tilt strength multiplier: 1 (full strength) normally, eased 0 -> 1
+    // over the 2s following either cooldown trigger above -- smoothstep
+    // rather than a linear ramp so the fade-in itself doesn't have a visible
+    // "start/stop" kink at either end.
+    let tiltStrength = 1;
+    if (tiltCooldownStartRef.current !== null) {
+      const elapsedSec = (performance.now() - tiltCooldownStartRef.current) / 1000;
+      if (elapsedSec >= 2) {
+        tiltCooldownStartRef.current = null;
+      } else {
+        const t = elapsedSec / 2;
+        tiltStrength = t * t * (3 - 2 * t); // smoothstep ease
+      }
+    }
+
+    // Cap delta to prevent a large accumulated time gap (e.g. from
+    // the React re-render when autoplayDone flips) from causing the
+    // damping to snap instantly instead of transitioning smoothly.
+    const safeDelta = Math.min(delta, 1 / 30);
 
     // Smoothly damp mouse X position (speed 5 for buttery smooth damping)
     currentMouseX.current = THREE.MathUtils.damp(
       currentMouseX.current,
       mouseXTarget.current,
       5,
-      delta
+      safeDelta
     );
 
     const camera = cameraObjRef.current;
@@ -177,10 +228,12 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
 
     // Y-axis tilt: turn camera left when mouse is on left half (-X), right when on right half (+X)
     // Z-axis tilt: subtle roll for added dynamic perspective
+    // Both scaled by tiltStrength so the cooldown fade-in above actually
+    // suppresses the tilt's visible contribution, not just its target.
     tiltEulerRef.current.set(
       0,
-      -currentMouseX.current * 0.05,
-      -currentMouseX.current * 0.015,
+      -currentMouseX.current * 0.05 * tiltStrength,
+      -currentMouseX.current * 0.015 * tiltStrength,
       "YXZ"
     );
     tiltQuatRef.current.setFromEuler(tiltEulerRef.current);
