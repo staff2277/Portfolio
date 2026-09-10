@@ -223,7 +223,7 @@ export default function SphereShell({ position, quaternion, scale, textures, act
   }, []);
 
   // Converted from the source's animate() body.
-  useFrame(() => {
+  useFrame((state, delta) => {
     // Paused (see HeroScene's sceneActive) once the hero scrolls out of
     // view or the tab goes inactive -- the pulse is time-driven off
     // performance.now() % 3.0, not accumulated state, so simply skipping
@@ -246,8 +246,12 @@ export default function SphereShell({ position, quaternion, scale, textures, act
     }
 
     // Smoothly transition hover state value between 0.0 (no hover) and 1.0 (hovered)
-    hoverStrengthRef.current +=
-      ((isHovered ? 1.0 : 0.0) - hoverStrengthRef.current) * 0.1;
+    hoverStrengthRef.current = THREE.MathUtils.damp(
+      hoverStrengthRef.current,
+      isHovered ? 1.0 : 0.0,
+      6.0,
+      delta
+    );
 
     // TWEAKABLE: Pulse timing and rhythm.
     // performance.now() / 1000.0 turns milliseconds into seconds.
@@ -336,11 +340,9 @@ export default function SphereShell({ position, quaternion, scale, textures, act
         target2 = target + Math.sin(i * 12.34 + 4.0) * HOVER_TILT_STRENGTH;
       }
 
-      hoverAttribute.array[i] += (target0 - hoverAttribute.array[i]) * 0.1;
-      hoverAttribute.array[i + 1] +=
-        (target1 - hoverAttribute.array[i + 1]) * 0.1;
-      hoverAttribute.array[i + 2] +=
-        (target2 - hoverAttribute.array[i + 2]) * 0.1;
+      hoverAttribute.array[i] = THREE.MathUtils.damp(hoverAttribute.array[i], target0, 6.0, delta);
+      hoverAttribute.array[i + 1] = THREE.MathUtils.damp(hoverAttribute.array[i + 1], target1, 6.0, delta);
+      hoverAttribute.array[i + 2] = THREE.MathUtils.damp(hoverAttribute.array[i + 2], target2, 6.0, delta);
     }
     hoverAttribute.needsUpdate = true;
   });
