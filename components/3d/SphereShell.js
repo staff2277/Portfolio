@@ -164,10 +164,10 @@ export default function SphereShell({ position, quaternion, scale, textures, act
     const roughnessMap = textures?.roughness ?? null;
     const metallicMap = textures?.metallic ?? null;
 
-    if (colorMap) colorMap.colorSpace = THREE.SRGBColorSpace;
-    if (normalTex) normalTex.colorSpace = THREE.NoColorSpace;
-    if (roughnessMap) roughnessMap.colorSpace = THREE.NoColorSpace;
-    if (metallicMap) metallicMap.colorSpace = THREE.NoColorSpace;
+    if (colorMap) { colorMap.colorSpace = THREE.SRGBColorSpace; colorMap.needsUpdate = true; }
+    if (normalTex) { normalTex.colorSpace = THREE.NoColorSpace; normalTex.needsUpdate = true; }
+    if (roughnessMap) { roughnessMap.colorSpace = THREE.NoColorSpace; roughnessMap.needsUpdate = true; }
+    if (metallicMap) { metallicMap.colorSpace = THREE.NoColorSpace; metallicMap.needsUpdate = true; }
 
     const shellMat = new MeshStandardNodeMaterial({
       side: THREE.DoubleSide,
