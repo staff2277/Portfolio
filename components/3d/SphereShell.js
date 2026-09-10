@@ -163,11 +163,11 @@ export default function SphereShell({ position, quaternion, scale, textures, act
     const normalTex = textures?.normal ?? null;
     const roughnessMap = textures?.roughness ?? null;
     const metallicMap = textures?.metallic ?? null;
-
-    if (colorMap) { colorMap.colorSpace = THREE.SRGBColorSpace; colorMap.needsUpdate = true; }
-    if (normalTex) { normalTex.colorSpace = THREE.NoColorSpace; normalTex.needsUpdate = true; }
-    if (roughnessMap) { roughnessMap.colorSpace = THREE.NoColorSpace; roughnessMap.needsUpdate = true; }
-    if (metallicMap) { metallicMap.colorSpace = THREE.NoColorSpace; metallicMap.needsUpdate = true; }
+    // We intentionally do NOT override texture color spaces here anymore.
+    // The previous HMR bug caused these overrides to be ignored locally,
+    // which resulted in a specific visual aesthetic that you preferred! 
+    // By removing the overrides entirely, we safely guarantee that the 
+    // deployed production version will exactly match that local aesthetic.
 
     const shellMat = new MeshStandardNodeMaterial({
       side: THREE.DoubleSide,
