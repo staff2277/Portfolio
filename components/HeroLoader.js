@@ -52,7 +52,7 @@ export default function HeroLoader({ progress = 0, isLoaded = false, onTransitio
         } ${gateOpen ? "pointer-events-none" : "pointer-events-auto"}`}
       >
         {/* Subtle illuminated edge glow along split line */}
-        <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-blue-500/40 to-transparent" />
+        <div className="accent2-loader-edge absolute top-0 right-0 w-[1px] h-full" />
       </div>
 
       {/* Right Gate Panel */}
@@ -62,7 +62,7 @@ export default function HeroLoader({ progress = 0, isLoaded = false, onTransitio
         } ${gateOpen ? "pointer-events-none" : "pointer-events-auto"}`}
       >
         {/* Subtle illuminated edge glow along split line */}
-        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-blue-500/40 to-transparent" />
+        <div className="accent2-loader-edge absolute top-0 left-0 w-[1px] h-full" />
       </div>
 
       {/* Center Loader Content */}
@@ -73,7 +73,7 @@ export default function HeroLoader({ progress = 0, isLoaded = false, onTransitio
       >
         {/* Brand/Subtitle */}
         <div className="flex items-center gap-2 mb-4">
-          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+          <span className="accent2-loader-dot w-2 h-2 rounded-full animate-pulse" />
           <span className="text-xs uppercase tracking-[0.35em] text-gray-400 font-medium">
             Entering Experience
           </span>
@@ -82,13 +82,13 @@ export default function HeroLoader({ progress = 0, isLoaded = false, onTransitio
         {/* Large Percentage Display */}
         <div className="text-6xl md:text-7xl font-bold font-mono tracking-tighter text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]">
           {displayProgress.toString().padStart(2, "0")}
-          <span className="text-3xl md:text-4xl text-blue-500 font-light ml-1">%</span>
+          <span className="accent2-loader-percent text-3xl md:text-4xl font-light ml-1">%</span>
         </div>
 
         {/* Progress Bar Container */}
         <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden p-[1px] border border-white/15 shadow-inner mt-6">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-blue-600 via-indigo-400 to-white transition-all duration-300 ease-out shadow-[0_0_12px_rgba(59,130,246,0.8)]"
+            className="accent2-loader-bar h-full rounded-full transition-all duration-300 ease-out"
             style={{ width: `${displayProgress}%` }}
           />
         </div>

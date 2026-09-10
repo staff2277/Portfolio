@@ -140,10 +140,11 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
   const tiltEulerRef = useRef(new THREE.Euler(0, 0, 0, "YXZ"));
   const tiltQuatRef = useRef(new THREE.Quaternion());
 
-  // Track mouse X position once autoplay finishes
+  // Track mouse X position from mount -- NOT gated by autoplayDone.
+  // This ensures mouseXTarget always reflects the real mouse position,
+  // so when the tilt effect activates there's no jump from 0 to the
+  // actual edge position.
   useEffect(() => {
-    if (!autoplayDone) return;
-
     const handleMouseMove = (e) => {
       // clientX range 0..width mapped to -1.0 (left half) .. +1.0 (right half)
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -154,18 +155,23 @@ export default function HeroScene({ gltf, textures, heroSectionRef, isLoaderFini
     return () => {
       window.removeEventListener("pointermove", handleMouseMove);
     };
-  }, [autoplayDone]);
+  }, []);
 
   // Apply smooth mouse tilt onto camera after autoplay completes
   useFrame((state, delta) => {
     if (!autoplayDone || !cameraObjRef.current) return;
+
+    // Cap delta to prevent a large accumulated time gap (e.g. from
+    // the React re-render when autoplayDone flips) from causing the
+    // damping to snap instantly instead of transitioning smoothly.
+    const safeDelta = Math.min(delta, 1 / 30);
 
     // Smoothly damp mouse X position (speed 5 for buttery smooth damping)
     currentMouseX.current = THREE.MathUtils.damp(
       currentMouseX.current,
       mouseXTarget.current,
       5,
-      delta
+      safeDelta
     );
 
     const camera = cameraObjRef.current;

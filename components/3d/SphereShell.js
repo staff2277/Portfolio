@@ -105,6 +105,14 @@ const RIM_INTENSITY = 3.5;
 // growth = pulse * IDLE_PULSE_AMOUNT  =>  scale = 1 + pulse * (IDLE_PULSE_AMOUNT / CORE_RADIUS)
 const CORE_PULSE_SCALE = IDLE_PULSE_AMOUNT / CORE_RADIUS;
 
+// --- Layer isolation ---
+// Three.js layers make lights only affect objects sharing the same layer.
+// By placing the core light on a dedicated layer that only the core mesh
+// shares, it becomes physically impossible for the light to illuminate
+// external objects (showroom, floor, etc.) no matter what distance or
+// intensity values are set.
+const CORE_LIGHT_LAYER = 1;
+
 export default function SphereShell({ position, quaternion, scale, textures, active = true }) {
   const { camera } = useThree();
 
@@ -221,6 +229,22 @@ export default function SphereShell({ position, quaternion, scale, textures, act
     window.addEventListener("pointermove", onPointerMove);
     return () => window.removeEventListener("pointermove", onPointerMove);
   }, []);
+
+  // Layer isolation: core light only affects core mesh, nothing else.
+  useEffect(() => {
+    if (coreLightRef.current) {
+      // .set() clears all layers and assigns ONLY the specified one
+      coreLightRef.current.layers.set(CORE_LIGHT_LAYER);
+    }
+    if (coreRef.current) {
+      // .enable() adds the layer without removing the default (layer 0),
+      // so the core mesh is still visible to the camera on layer 0
+      // AND receives light from the core light on layer 1.
+      coreRef.current.layers.enable(CORE_LIGHT_LAYER);
+    }
+    // Camera must also see layer 1 to render the core mesh
+    camera.layers.enable(CORE_LIGHT_LAYER);
+  }, [camera]);
 
   // Converted from the source's animate() body.
   useFrame((state, delta) => {
