@@ -254,10 +254,9 @@ export default function SphereShell({ position, quaternion, scale, textures, act
     );
 
     // TWEAKABLE: Pulse timing and rhythm.
-    // performance.now() / 1000.0 turns milliseconds into seconds.
     // 'timeNow % 3.0' loops the animation every 3.0 seconds (3.0s interval).
     // 'beatTime < 0.4' makes the actual heartbeat pulse last for 0.4 seconds.
-    const timeNow = performance.now() / 1000.0;
+    const timeNow = state.clock.elapsedTime;
     const beatTime = timeNow % 3.0;
     let pulse = 0.0;
     if (beatTime < 0.4) {
@@ -300,6 +299,10 @@ export default function SphereShell({ position, quaternion, scale, textures, act
     const positions = sphereShell.geometry.attributes.position.array;
     const radius = HOVER_RADIUS;
 
+    // Calculate the frame-rate independent damp factor once per frame
+    // to avoid computing Math.exp() 12,000+ times inside the vertex loop.
+    const dampFactor = 1.0 - Math.exp(-6.0 * delta);
+
     for (let i = 0; i < hoverAttribute.count; i += 3) {
       const subtlePulse = pulse * IDLE_PULSE_AMOUNT;
       const subtleTilt = pulse * IDLE_TILT_AMOUNT;
@@ -340,9 +343,9 @@ export default function SphereShell({ position, quaternion, scale, textures, act
         target2 = target + Math.sin(i * 12.34 + 4.0) * HOVER_TILT_STRENGTH;
       }
 
-      hoverAttribute.array[i] = THREE.MathUtils.damp(hoverAttribute.array[i], target0, 6.0, delta);
-      hoverAttribute.array[i + 1] = THREE.MathUtils.damp(hoverAttribute.array[i + 1], target1, 6.0, delta);
-      hoverAttribute.array[i + 2] = THREE.MathUtils.damp(hoverAttribute.array[i + 2], target2, 6.0, delta);
+      hoverAttribute.array[i] += (target0 - hoverAttribute.array[i]) * dampFactor;
+      hoverAttribute.array[i + 1] += (target1 - hoverAttribute.array[i + 1]) * dampFactor;
+      hoverAttribute.array[i + 2] += (target2 - hoverAttribute.array[i + 2]) * dampFactor;
     }
     hoverAttribute.needsUpdate = true;
   });
