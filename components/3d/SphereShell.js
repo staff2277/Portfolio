@@ -264,10 +264,10 @@ export default function SphereShell({ position, quaternion, scale, textures, act
       pulse = Math.sin((beatTime / 0.4) * Math.PI);
     }
 
-    // How "open" the core is right now: hovering or a heartbeat peak both
-    // count, whichever is stronger. Drives the light's reach, the rim glow,
-    // and the ray burst -- all contained at 0, all escaping at 1.
-    const revealFactor = Math.max(hoverStrengthRef.current, pulse);
+    // Hover strength (0–1) controls how much the light escapes past the
+    // shell. Pulse drives the core glow brightness but is kept physically
+    // contained inside the sphere (CORE_LIGHT_CONTAINED_DISTANCE < SPHERE_RADIUS).
+    const hoverReveal = hoverStrengthRef.current;
 
     // 1. Core mesh scales up and down like a pulsing heart
     const pulseScale = 1 + pulse * CORE_PULSE_SCALE;
@@ -278,19 +278,26 @@ export default function SphereShell({ position, quaternion, scale, textures, act
     coreMaterial.color.copy(CORE_COLOR).lerp(HIGHLIGHT_COLOR, pulse * 0.6);
     coreMaterial.emissive.copy(CORE_COLOR).lerp(HIGHLIGHT_COLOR, pulse * 0.6);
 
-    // 3. Contain the point light near the core when idle, let it reach out
-    // past the shell wall when hovered or at a beat peak.
+    // 3. Light distance: only extend past the sphere shell on HOVER.
+    // During pulse the distance stays at CORE_LIGHT_CONTAINED_DISTANCE (7)
+    // which is smaller than SPHERE_RADIUS (10), so the light physically
+    // cannot illuminate anything outside the shell.
     coreLight.distance = THREE.MathUtils.lerp(
       CORE_LIGHT_CONTAINED_DISTANCE,
       SPHERE_RADIUS * 15,
-      revealFactor,
+      hoverReveal,
     );
+    // Intensity: pulse still brightens the core glow (visible inside), and
+    // the base is always on at a dim level so the core isn't pitch black.
+    // When hovered the multiplier ramps to 1.0 letting full brightness out.
     coreLight.intensity =
-      8000 * (1.0 + pulse * 0.5) * THREE.MathUtils.lerp(0, 1, revealFactor);
+      8000 * (1.0 + pulse * 0.5) * THREE.MathUtils.lerp(
+        CORE_LIGHT_CONTAINED_INTENSITY_MULT, 1.0, Math.max(hoverReveal, pulse)
+      );
 
-    // 4. Push the reveal factor and current core color into the shell's
-    // Fresnel rim glow shader.
-    if (revealUniformRef.current) revealUniformRef.current.value = revealFactor;
+    // 4. Fresnel rim glow on the shell exterior: hover-only.
+    // Pulse should NOT make the outside of the shell glow.
+    if (revealUniformRef.current) revealUniformRef.current.value = hoverReveal;
     if (rimColorUniformRef.current) {
       rimColorUniformRef.current.value.copy(coreMaterial.emissive);
     }
